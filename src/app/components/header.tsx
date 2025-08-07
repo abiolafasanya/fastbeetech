@@ -53,7 +53,7 @@ export default function Header() {
             Services
           </Link>
           <Link
-            href="#internship"
+            href="/internship"
             className="text-sm font-medium hover:underline"
           >
             Internship
@@ -92,7 +92,7 @@ export default function Header() {
                   Services
                 </Link>
                 <Link
-                  href="#internship"
+                  href="/internship"
                   onClick={() => setIsOpen(false)}
                   className="text-sm font-medium"
                 >
