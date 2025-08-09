@@ -1,4 +1,3 @@
-import { UpdateStoreSchema } from "@/app/store/schema/store";
 import QueryBuilder from "@/lib/utils";
 import { ApiResponse } from "@/types/global";
 import axios, { AxiosResponse } from "axios";
@@ -33,15 +32,6 @@ class StoreApi {
     const query = new QueryBuilder(`${this.url}/${slug}`).build();
 
     const response: AxiosResponse<ApiResponse<Store>> = await axios.get(query);
-    return response.data;
-  }
-  async updateStore(payload: UpdateStoreSchema): Promise<ApiResponse<unknown>> {
-    const query = new QueryBuilder(`${this.url}/`).build();
-
-    const response: AxiosResponse<ApiResponse<unknown>> = await axios.put(
-      query,
-      payload
-    );
     return response.data;
   }
   // async getPublicStore,

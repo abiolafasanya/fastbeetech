@@ -1,8 +1,8 @@
 import { LoginInput, RegisterInput } from "@/app/(auth)/schema/auth";
-import {
-  ChangePasswordSchema,
-  UpdateProfileSchema,
-} from "@/app/profile/schema/profile";
+// import {
+//   ChangePasswordSchema,
+//   UpdateProfileSchema,
+// } from "@/app/profile/schema/profile";
 import QueryBuilder from "@/lib/utils";
 import { ApiResponse } from "@/types/global";
 import axios, { AxiosResponse } from "axios";
@@ -44,21 +44,21 @@ class AuthApi {
     );
     return data.data;
   }
-  async updateProfile(payload: UpdateProfileSchema): Promise<AuthResponse> {
-    const { data }: AxiosResponse<{ data: AuthResponse }> = await axios.patch(
-      `${this.url}/profile`,
-      payload
-    );
-    return data.data;
-  }
+  // async updateProfile(payload: UpdateProfileSchema): Promise<AuthResponse> {
+  //   const { data }: AxiosResponse<{ data: AuthResponse }> = await axios.patch(
+  //     `${this.url}/profile`,
+  //     payload
+  //   );
+  //   return data.data;
+  // }
 
-  async changePassword(payload: ChangePasswordSchema): Promise<AuthResponse> {
-    const { data }: AxiosResponse<{ data: AuthResponse }> = await axios.post(
-      `${this.url}/change-password`,
-      payload
-    );
-    return data.data;
-  }
+  // async changePassword(payload: ChangePasswordSchema): Promise<AuthResponse> {
+  //   const { data }: AxiosResponse<{ data: AuthResponse }> = await axios.post(
+  //     `${this.url}/change-password`,
+  //     payload
+  //   );
+  //   return data.data;
+  // }
 
   async verifyEmail(payload: {
     token: string;

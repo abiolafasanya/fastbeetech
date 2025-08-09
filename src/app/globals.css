@@ -112,6 +112,25 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* code blocks */
+pre code {
+  counter-reset: line;
+}
+
+pre [data-line] {
+  padding: 0 0.75rem;
+}
+
+pre [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: oklch(0.556 0 0 / 0.6);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -21,7 +21,7 @@ class InternshipApi {
   private readonly url: string;
 
   constructor() {
-    this.url = "/api/v1/listing";
+    this.url = "/api/v1/internship";
   }
 
   private buildListingQuery = (filters: Partial<ListingFilters>) => {
