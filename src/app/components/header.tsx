@@ -47,7 +47,7 @@ export default function Header() {
         {/* Desktop nav links */}
         <nav className="hidden md:flex gap-6 items-center">
           <Link
-            href="#services"
+            href="/#services"
             className="text-sm font-medium hover:underline"
           >
             Services
@@ -85,7 +85,7 @@ export default function Header() {
             >
               <nav className="flex flex-col gap-4">
                 <Link
-                  href="#services"
+                  href="/#services"
                   onClick={() => setIsOpen(false)}
                   className="text-sm font-medium"
                 >

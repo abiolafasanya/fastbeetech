@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { blogs } from "@/data/blog";
 
 export default function LandingPage() {
   return (
@@ -91,17 +92,17 @@ export default function LandingPage() {
             Latest Blog Posts
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+            {blogs.map((blog, i) => (
               <Card key={i}>
                 <CardHeader>
-                  <CardTitle>Blog Post Title {i}</CardTitle>
+                  <CardTitle>{blog.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Short excerpt from the blog post...
+                    {blog.excerpt}
                   </p>
                   <Link
-                    href={`/blog/post-${i}`}
+                    href={`/blog/${blog.slug}`}
                     className="text-blue-600 text-sm flex items-center"
                   >
                     Read More <ArrowRight className="ml-1 w-4 h-4" />
