@@ -27,6 +27,15 @@ export const onChangeValidate = <
   }
 };
 
+export function slugify(input: string): string {
+  return input
+    .toLowerCase() // Convert to lowercase
+    .trim() // Remove whitespace from both ends
+    .replace(/[^a-z0-9\s-]/g, "") // Remove all non-alphanumeric characters except space and hyphen
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-"); // Remove multiple consecutive hyphens
+}
+
 class QueryBuilder {
   private query: string;
 
@@ -39,6 +48,15 @@ class QueryBuilder {
     this.query += `${encodeURIComponent(key)}=${encodeURIComponent(
       String(value)
     )}&`;
+    return this;
+  }
+
+  addParams(
+    params: Record<string, string | number | boolean | undefined>
+  ): this {
+    for (const [key, value] of Object.entries(params)) {
+      this.set(key, value);
+    }
     return this;
   }
 

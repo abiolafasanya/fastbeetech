@@ -1,26 +1,37 @@
+// app/blog/page.tsx
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { getAllPosts, filterPosts, paginate } from "@/lib/blog";
+import { BlogApi } from "@/lib/blog";
 
-export const dynamic = "force-static"; // build-time when possible
+export const dynamic = "force-static"; // cache + ISR
+export const revalidate = 60;
 
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; tag?: string; page?: string }>;
+  searchParams?: { q?: string; tag?: string; page?: string };
 }) {
-  const sp = await searchParams; // <-- await it
-  const q = sp?.q?.trim() || undefined;
-  const tag = sp?.tag?.trim() || undefined;
-  const page = Number(sp?.page ?? 1);
-  const includeDrafts = process.env.NODE_ENV !== "production";
-  const all = getAllPosts({ includeDrafts });
-  const filtered = filterPosts(all, q, tag);
-  const { items, pages, current } = paginate(filtered, page, 9);
+  const q = searchParams?.q?.trim();
+  const tag = searchParams?.tag?.trim();
+  const page = Number(searchParams?.page ?? 1);
+
+  const qs = new URLSearchParams();
+  qs.set("page", String(page));
+  qs.set("limit", "9");
+  if (q) qs.set("search", q);
+  if (tag) qs.set("tag", tag);
+  // only published for public list
+  qs.set("status", "published");
+
+  const resp = await BlogApi.list(qs);
+  const items = resp.data;
+  const meta = resp.meta;
+
+  // Optional: derive all tags from current page (or add an endpoint for tags)
   const allTags = Array.from(
-    new Set(all.flatMap((p) => p.frontmatter.tags ?? []))
+    new Set(items.flatMap((p) => p.tags ?? []))
   ).sort();
 
   return (
@@ -41,7 +52,7 @@ export default async function BlogPage({
         <button className="hidden" type="submit" aria-hidden />
       </form>
 
-      {/* Tags */}
+      {/* Tags (from current items; replace with global tags if you add API) */}
       {allTags.length > 0 && (
         <div className="flex flex-wrap gap-2 justify-center mb-8">
           <Link
@@ -71,35 +82,33 @@ export default async function BlogPage({
         </div>
       )}
 
-      {/* Empty state */}
+      {/* Cards */}
       {items.length === 0 ? (
         <div className="mx-auto max-w-xl text-center rounded-xl border p-8">
           <p className="text-muted-foreground">No posts found.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {items.map(({ slug, frontmatter }) => (
-            <Card key={slug} className="overflow-hidden">
-              {frontmatter.cover ? (
+          {items.map((p) => (
+            <Card key={p._id} className="overflow-hidden">
+              {p.cover ? (
                 <Image
-                  src={frontmatter.cover}
-                  alt={frontmatter.title}
+                  src={p.cover}
+                  alt={p.title}
                   width={1200}
                   height={630}
                   className="h-40 w-full object-cover"
                 />
               ) : null}
               <CardHeader>
-                <CardTitle className="line-clamp-2">
-                  {frontmatter.title}
-                </CardTitle>
+                <CardTitle className="line-clamp-2">{p.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground line-clamp-3">
-                  {frontmatter.excerpt}
+                  {p.excerpt}
                 </p>
                 <Link
-                  href={`/blog/${slug}`}
+                  href={`/blog/${p.slug}`}
                   className="text-blue-600 text-sm mt-3 inline-block"
                 >
                   Read More →
@@ -111,9 +120,9 @@ export default async function BlogPage({
       )}
 
       {/* Pagination */}
-      {pages > 1 && (
+      {meta.totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-10">
-          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+          {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((p) => (
             <Link
               key={p}
               href={`/blog?${[
@@ -124,7 +133,7 @@ export default async function BlogPage({
                 .filter(Boolean)
                 .join("&")}`}
               className={`px-3 py-1 rounded border text-sm ${
-                p === current ? "bg-muted" : "hover:bg-muted"
+                p === meta.currentPage ? "bg-muted" : "hover:bg-muted"
               }`}
             >
               {p}

@@ -4,9 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import useHeader from "./hooks/useHeader";
 import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/authStore";
 
 export default function Header() {
   const { isOpen, setIsOpen, theme, toggleTheme } = useHeader();
+  const { logout, user, isLoggedOut } = useAuthStore();
 
   return (
     <>
@@ -61,6 +64,23 @@ export default function Header() {
           <Link href="/blog" className="text-sm font-medium hover:underline">
             Blog
           </Link>
+          {isLoggedOut ? (
+            <Link href="/login">
+              <Button variant="outline">Login</Button>
+            </Link>
+          ) : (
+            <>
+              {user && user.role !== "user" && (
+                <Link
+                  href="/dashboard"
+                  className="text-sm font-medium hover:underline"
+                >
+                  Dashboard
+                </Link>
+              )}
+              <Button onClick={() => logout()}>Logout</Button>
+            </>
+          )}
         </nav>
       </header>
 
