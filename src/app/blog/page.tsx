@@ -8,28 +8,29 @@ import { BlogApi } from "@/lib/blog";
 export const dynamic = "force-static"; // cache + ISR
 export const revalidate = 60;
 
+type BlogSearch = { q?: string; tag?: string; page?: string };
+
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams?: { q?: string; tag?: string; page?: string };
+  searchParams?: Promise<BlogSearch>;
 }) {
-  const q = searchParams?.q?.trim();
-  const tag = searchParams?.tag?.trim();
-  const page = Number(searchParams?.page ?? 1);
+  const sp = await searchParams; // ← await the promise
+  const q = sp?.q?.trim();
+  const tag = sp?.tag?.trim();
+  const page = Number(sp?.page ?? 1);
 
   const qs = new URLSearchParams();
   qs.set("page", String(page));
   qs.set("limit", "9");
   if (q) qs.set("search", q);
   if (tag) qs.set("tag", tag);
-  // only published for public list
   qs.set("status", "published");
 
   const resp = await BlogApi.list(qs);
   const items = resp.data;
   const meta = resp.meta;
 
-  // Optional: derive all tags from current page (or add an endpoint for tags)
   const allTags = Array.from(
     new Set(items.flatMap((p) => p.tags ?? []))
   ).sort();

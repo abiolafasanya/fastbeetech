@@ -10,13 +10,15 @@ export const revalidate = 300;
 
 type PageParams = { slug: string };
 
+// ✅ In Next 15, params is a Promise
 export async function generateMetadata({
   params,
 }: {
-  params: PageParams;
+  params: Promise<PageParams>;
 }): Promise<Metadata> {
   try {
-    const { data: post } = await BlogApi.bySlug(params.slug);
+    const { slug } = await params; // <-- await it
+    const { data: post } = await BlogApi.bySlug(slug);
     const cover = post.ogImage || post.cover || "/opengraph-image.png";
     const url = `https://fastbeetech.com/blog/${post.slug}`;
     return {
@@ -46,10 +48,17 @@ export async function generateMetadata({
   }
 }
 
-export default async function BlogPostPage({ params }: { params: PageParams }) {
+// ✅ Same for the page component
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<PageParams>;
+}) {
+  const { slug } = await params; // <-- await it
+
   let post;
   try {
-    const resp = await BlogApi.bySlug(params.slug);
+    const resp = await BlogApi.bySlug(slug);
     post = resp.data;
   } catch {
     notFound();
@@ -77,12 +86,11 @@ export default async function BlogPostPage({ params }: { params: PageParams }) {
         {post.readingTime ? ` · ${post.readingTime} min read` : null}
       </p>
 
-      {/* Set format="markdown" if your API stores Markdown; "html" if it stores rendered HTML */}
       <PostContent content={post.content} format="markdown" />
 
       {Array.isArray(post.tags) && post.tags.length ? (
         <div className="flex flex-wrap gap-2 mt-8">
-          {post.tags.map((t) => (
+          {post.tags.map((t: string) => (
             <span key={t} className="text-xs px-2 py-1 rounded-full border">
               {t}
             </span>
