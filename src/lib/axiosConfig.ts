@@ -1,7 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
-// import { toast } from "sonner";
 
 // Type for the error response
 interface ErrorResponse {
@@ -13,18 +12,12 @@ interface ErrorResponse {
 const axiosConfig = async (): Promise<void> => {
   axios.defaults.baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
+  // Enable credentials to send HTTP-only cookies
   axios.defaults.withCredentials = true;
 
-  // ✅ Add request interceptor to dynamically inject token
-  axios.interceptors.request.use((config) => {
-    const token = useAuthStore.getState().token;
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    return config;
-  });
+  // No need for request interceptor since backend uses HTTP-only cookies
 
-  // ✅ Response interceptor remains the same
+  // ✅ Response interceptor for handling auth errors
   axios.interceptors.response.use(
     (response: AxiosResponse) => response,
     (error: AxiosError<ErrorResponse>) => {

@@ -3,8 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "../../schema/auth";
 import authApi from "@/api/AuthApi";
 import { useAuthStore } from "@/store/authStore";
-import { useRouter } from "next/navigation";
-import axios, { AxiosError } from "axios";
+import { useRouter, useSearchParams } from "next/navigation";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -16,6 +16,7 @@ export const useLogin = () => {
 
   const { isLoggedOut, login, setIsLoggedOut } = useAuthStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const mutation = useMutation({
     mutationKey: ["loginMutation"],
@@ -34,7 +35,7 @@ export const useLogin = () => {
 
   useEffect(() => {
     if (!isLoggedOut) {
-      console.log("Logout", isLoggedOut)
+      console.log("Logout", isLoggedOut);
       router.push("/");
     }
   }, [isLoggedOut, router]);
@@ -42,14 +43,19 @@ export const useLogin = () => {
   const handleSubmit = form.handleSubmit(async (data) => {
     const response = await mutation.mutateAsync(data);
 
-    login(response.user); // sets token & other data
-    axios.defaults.headers.common["Authorization"] = response.token;
+    // Since backend sets HTTP-only cookie, we don't need to manually set it
+    // Just update the auth store with user data
+    login(response.user);
 
-    const redirectTo = sessionStorage.getItem("redirectAfterLogin");
+    // Check for redirect from middleware
+    const redirectFromMiddleware = searchParams.get("redirect");
+    const redirectFromSession = sessionStorage.getItem("redirectAfterLogin");
     sessionStorage.removeItem("redirectAfterLogin");
 
-    if (redirectTo) {
-      router.replace(redirectTo);
+    if (redirectFromMiddleware) {
+      router.replace(redirectFromMiddleware);
+    } else if (redirectFromSession) {
+      router.replace(redirectFromSession);
     } else {
       router.push("/");
     }

@@ -15,10 +15,15 @@ export interface User {
   phone: string;
   avatar: string;
 }
+
+// For responses that include token (register)
 export interface AuthResponse {
   token: string;
   user: User;
 }
+
+// For responses that only include user (login - token is in HTTP-only cookie)
+export type LoginResponse = Pick<AuthResponse, 'user'>;
 
 export interface ResetPassword {
   email: string;
@@ -29,8 +34,8 @@ export interface ResetPassword {
 class AuthApi {
   private readonly url = "/api/v1/auth";
 
-  async login(payload: LoginInput): Promise<AuthResponse> {
-    const { data }: AxiosResponse<{ data: AuthResponse }> = await axios.post(
+  async login(payload: LoginInput): Promise<LoginResponse> {
+    const { data }: AxiosResponse<{ data: LoginResponse }> = await axios.post(
       `${this.url}/`,
       payload
     );
@@ -74,8 +79,10 @@ class AuthApi {
   }
 
   async resetPassword(payload: ResetPassword): Promise<ApiResponse<string>> {
-    const response: AxiosResponse<ApiResponse<string>> =
-      await axios.post(`${this.url}/reset-password`, payload);
+    const response: AxiosResponse<ApiResponse<string>> = await axios.post(
+      `${this.url}/reset-password`,
+      payload
+    );
     return response.data;
   }
 
@@ -88,13 +95,15 @@ class AuthApi {
   }
 
   async getMe(): Promise<AuthResponse["user"]> {
-    const response: AxiosResponse<AuthResponse["user"]> =
-      await axios.get(`${this.url}/me`);
+    const response: AxiosResponse<AuthResponse["user"]> = await axios.get(
+      `${this.url}/me`
+    );
     return response.data;
   }
   async logout(): Promise<ApiResponse<string>> {
-    const response: AxiosResponse<ApiResponse<string>> =
-      await axios.post(`${this.url}/logout`);
+    const response: AxiosResponse<ApiResponse<string>> = await axios.post(
+      `${this.url}/logout`
+    );
     return response.data;
   }
 }

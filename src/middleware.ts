@@ -10,9 +10,14 @@ export function middleware(request: NextRequest) {
   );
 
   if (isProtected && !token) {
-    console.log("token not found", request.cookies);
-    console.log("Unauthorized access attempt to:", request.nextUrl.pathname);
-    return NextResponse.redirect(new URL("/login", request.url));
+    console.log("Token not found in cookies, redirecting to login");
+    console.log("Attempted path:", request.nextUrl.pathname);
+
+    // Store the intended destination for redirect after login
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
