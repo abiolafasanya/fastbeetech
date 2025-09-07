@@ -11,6 +11,6 @@ export function usePosts(params?: {
 }) {
   return useQuery({
     queryKey: ["posts", params],
-    queryFn: () => BlogApi.list(params),
+    queryFn: () => BlogApi.listPostAdmin(params),
   });
 }

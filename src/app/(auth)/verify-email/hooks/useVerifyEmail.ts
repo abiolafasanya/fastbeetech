@@ -12,7 +12,7 @@ export default function useVerifyEmail() {
   const token = searchParams.get("token");
   const email = searchParams.get("email");
   const [message, setMessage] = useState("");
-  const router  = useRouter();
+  const router = useRouter();
 
   const mutation = useMutation({
     mutationKey: ["verify-email", token, email],
@@ -30,17 +30,17 @@ export default function useVerifyEmail() {
       setMessage(data.message);
       toast.success(data.message);
       router.push("/login");
-    }
+    },
   });
 
   useEffect(() => {
     if (token && email) {
-      mutation.mutate({token, email}); // auto-verify on page load
+      mutation.mutate({ token, email }); // auto-verify on page load
     }
-  }, [token, email]);
+  }, [token, email, mutation]);
 
   const onVerify = () => {
-    if (token && email) mutation.mutate({token, email});
+    if (token && email) mutation.mutate({ token, email });
   };
 
   return {

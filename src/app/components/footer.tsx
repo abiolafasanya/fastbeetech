@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="py-10 bg-gray-900 text-white text-center">
       <p className="text-sm mb-4">
-        &copy; {new Date().getFullYear()} Fastbeetech. All rights reserved.
+        &copy; {new Date().getFullYear()} Hexonest. All rights reserved.
       </p>
 
       <div className="flex justify-center gap-6">

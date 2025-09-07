@@ -4,7 +4,7 @@ export async function GET() {
   const API_URL = `${process.env.API_URL}/admin/stats`;
   // e.g. https://api.fastbeetech.com or http://localhost:4000
 
-  const cookieHeader = cookies().toString(); // includes httpOnly cookies
+  const cookieHeader = (await cookies()).toString(); // includes httpOnly cookies
   const upstream = await fetch(API_URL, {
     method: "GET",
     headers: {

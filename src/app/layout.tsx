@@ -13,20 +13,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// ---- Site constants (adjust to prod domain) ----
-const SITE_URL = "https://fastbeetech.com";
-const SITE_NAME = "Fastbeetech";
-const SITE_TAGLINE = "Empowering Africa’s Digital Future";
+/** -------------------------------
+ *  Site constants (Hexonest)
+ *  Update SITE_URL when prod domain is live
+ *  ------------------------------- */
+const SITE_URL = "https://hexonest.com";
+const SITE_NAME = "Hexonest";
+const SITE_TAGLINE = "Build fast. Ship smart.";
 
-// Optional: exact office address for Local SEO (Lagos)
+// Optional: Local SEO (Lagos)
 const ORG = {
-  name: "Fastbeetech",
-  legalName: "Fastbeetech",
+  name: "Hexonest",
+  legalName: "Hexonest Digital Ltd.",
   url: SITE_URL,
-  logo: `${SITE_URL}/logo.png`,
+  logo: "/hexonest-logo-light.svg", // served from /public
   sameAs: [
-    "https://x.com/fastbeetech",
-    // add more socials when ready
+    "https://x.com/hexonest",
+    // add linkedin, github, etc.
   ],
   address: {
     streetAddress: "14 Isaac Anjorin Street, Fawole, Igbogbo, Ikorodu",
@@ -50,9 +53,9 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    "Fastbeetech builds modern web & mobile apps, AI automations, and trains young engineers. Ship faster with Next.js, Express, and solid UX.",
+    "Hexonest builds modern web & mobile apps, AI automations, and trains engineers. Ship faster with Next.js, Express, and thoughtful UX.",
   keywords: [
-    "Fastbeetech",
+    "Hexonest",
     "software development Nigeria",
     "Next.js developers",
     "AI automation",
@@ -61,9 +64,7 @@ export const metadata: Metadata = {
     "UI/UX design",
     "tech training Nigeria",
   ],
-  alternates: {
-    canonical: SITE_URL, // per-page can override in generateMetadata
-  },
+  alternates: { canonical: SITE_URL },
   category: "technology",
   applicationName: SITE_NAME,
   openGraph: {
@@ -72,65 +73,53 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: `${SITE_NAME} | ${SITE_TAGLINE}`,
     description:
-      "Modern apps, AI automations, and engineering training for Africa’s digital future.",
+      "Modern apps, AI automations, and engineering training — built to scale.",
     images: [
       {
         url: "/opengraph-image.png",
         width: 1200,
         height: 630,
-        alt: "Fastbeetech — Empowering Africa’s Digital Future",
+        alt: "Hexonest — Build fast. Ship smart.",
       },
     ],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    creator: "@fastbeetech",
-    site: "@fastbeetech",
+    creator: "@hexonest",
+    site: "@hexonest",
     title: `${SITE_NAME} | ${SITE_TAGLINE}`,
     description:
-      "Modern apps, AI automations, and engineering training for Africa’s digital future.",
+      "Modern apps, AI automations, and engineering training — built to scale.",
     images: ["/opengraph-image.png"],
   },
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon-192.png", sizes: "192x192" },
-      { url: "/icon-512.png", sizes: "512x512" },
+      { url: "/hexonest-favicon.ico" },
+      { url: "/hexonest-favicon-32.png", sizes: "32x32" },
+      { url: "/hexonest-favicon-16.png", sizes: "16x16" },
+      { url: "/hexonest-favicon-192.png", sizes: "192x192" },
+      { url: "/hexonest-favicon-512.png", sizes: "512x512" },
     ],
-    apple: [{ url: "/apple-touch-icon.png" }],
+    apple: [{ url: "/hexonest-favicon-180.png", sizes: "180x180" }],
   },
   robots: {
     index: true,
     follow: true,
     nocache: false,
-    googleBot: {
-      index: true,
-      follow: true,
-      noimageindex: false,
-      // maxSnippet: -1,
-      // maxImagePreview: "large",
-      // maxVideoPreview: -1,
-    },
+    googleBot: { index: true, follow: true, noimageindex: false },
   },
   verification: {
-    google: "GOOGLE_SITE_VERIFICATION_TOKEN", // <- replace
-    other: {
-      "msvalidate.01": ["BING_VERIFICATION_TOKEN"], // optional
-    },
+    google: "GOOGLE_SITE_VERIFICATION_TOKEN", // replace
+    other: { "msvalidate.01": ["BING_VERIFICATION_TOKEN"] },
   },
-  appLinks: {
-    web: {
-      url: SITE_URL,
-      should_fallback: true,
-    },
-  },
+  appLinks: { web: { url: SITE_URL, should_fallback: true } },
   manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0B0F19" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B0F19" }, // slate-950-ish
     { color: "#ffffff" },
   ],
   colorScheme: "light dark",
@@ -153,7 +142,9 @@ export default function RootLayout({
           <main>{children}</main>
           <Footer />
         </AppInitProvider>
-        <Toaster position="top-center" toastOptions={{ duration: 5000 }} />
+        <Toaster position="top-right" richColors />
+
+        {/* <Toaster position="top-center" toastOptions={{ duration: 5000 }} /> */}
 
         {/* Organization + Website + LocalBusiness JSON‑LD */}
         <script
@@ -202,3 +193,4 @@ export default function RootLayout({
     </html>
   );
 }
+

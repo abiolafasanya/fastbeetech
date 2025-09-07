@@ -2,16 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  Loader2,
-  Plus,
-  Trash2,
-  Globe,
-  Star,
-  CalendarClock,
-  Edit,
-  CirclePower,
-} from "lucide-react";
+import { Loader2, Plus, Trash2, Globe, Edit, CirclePower } from "lucide-react";
 import { usePosts } from "./hooks/usePost";
 import { usePostMutations } from "./hooks/usePostMutation";
 

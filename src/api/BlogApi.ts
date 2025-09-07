@@ -29,6 +29,10 @@ export interface BlogPost {
   author: { _id: string; name: string; avatar?: string } | string;
   createdAt: string;
   updatedAt: string;
+  // Reaction fields for Facebook-style reactions
+  reactions?: Record<string, number>;
+  reactionsByUser?: { user: string; type: string }[];
+  currentUserId?: string | null;
 }
 
 // api/BlogApi.ts
@@ -44,7 +48,6 @@ export interface BlogComment {
   createdAt: string;
   updatedAt: string;
 }
-
 
 export interface BlogListResponse extends ApiResponse<BlogPost[]> {
   meta: {
@@ -91,6 +94,24 @@ class BlogApi {
     to?: string;
   }): Promise<BlogListResponse> {
     const qb = new QueryBuilder(`${this.url}/posts`).addParams(params ?? {});
+    const res: AxiosResponse<BlogListResponse> = await axios.get(qb.build());
+    return res.data;
+  }
+  async listPostAdmin(params?: {
+    page?: number;
+    limit?: number;
+    status?: BlogStatus;
+    tag?: string;
+    author?: string;
+    search?: string;
+    featured?: boolean;
+    trending?: boolean;
+    from?: string;
+    to?: string;
+  }): Promise<BlogListResponse> {
+    const qb = new QueryBuilder(`${this.url}/admin/posts`).addParams(
+      params ?? {}
+    );
     const res: AxiosResponse<BlogListResponse> = await axios.get(qb.build());
     return res.data;
   }
@@ -224,7 +245,21 @@ class BlogApi {
   }
 
   async getById(id: string): Promise<ApiResponse<BlogPost>> {
-    const res: AxiosResponse<ApiResponse<BlogPost>> = await axios.get(`${this.url}/admin/posts/${id}`);
+    const res: AxiosResponse<ApiResponse<BlogPost>> = await axios.get(
+      `${this.url}/admin/posts/${id}`
+    );
+    return res.data;
+  }
+
+  // Add a reaction to a blog post
+  async react(
+    postId: string,
+    type: string
+  ): Promise<{ status: boolean; reactions: Record<string, number> }> {
+    const res: AxiosResponse<{
+      status: boolean;
+      reactions: Record<string, number>;
+    }> = await axios.post(`${this.url}/posts/${postId}/react`, { type });
     return res.data;
   }
 }

@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
+// import { toast } from "sonner";
 
 // Type for the error response
 interface ErrorResponse {
@@ -14,15 +15,14 @@ const axiosConfig = async (): Promise<void> => {
 
   axios.defaults.withCredentials = true;
 
-
   // ✅ Add request interceptor to dynamically inject token
-  // axios.interceptors.request.use((config) => {
-  //   const token = useAuthStore.getState().token;
-  //   if (token) {
-  //     config.headers["Authorization"] = `Bearer ${token}`;
-  //   }
-  //   return config;
-  // });
+  axios.interceptors.request.use((config) => {
+    const token = useAuthStore.getState().token;
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
 
   // ✅ Response interceptor remains the same
   axios.interceptors.response.use(
@@ -42,6 +42,5 @@ const axiosConfig = async (): Promise<void> => {
     }
   );
 };
-
 
 export default axiosConfig;

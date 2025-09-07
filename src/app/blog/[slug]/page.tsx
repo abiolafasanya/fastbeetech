@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogApi } from "@/lib/blog";
 import PostContent from "@/components/PostContent";
+import BlogEngagement from "@/components/BlogEngagement";
 
 export const dynamic = "force-static";
 export const revalidate = 300;
@@ -97,6 +98,12 @@ export default async function BlogPostPage({
           ))}
         </div>
       ) : null}
+
+      {/* Blog comments and reactions */}
+      <BlogEngagement
+        postId={post._id}
+        slug={post.slug}
+      />
     </article>
   );
 }

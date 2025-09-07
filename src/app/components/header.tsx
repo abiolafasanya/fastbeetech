@@ -17,8 +17,8 @@ export default function Header() {
         <Link href="/">
           <div className="flex items-center gap-2">
             <Image
-              src="/fastbeetnamelogo2.jpeg"
-              alt="Fastbeetech Logo"
+              src="/hexonest-logo-light.svg"
+              alt="Hexonest Logo"
               width={160}
               height={40}
               priority

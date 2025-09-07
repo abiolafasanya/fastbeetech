@@ -1,14 +1,5 @@
 import { z } from "zod";
 
-const tagsSchema = z.union([z.string(), z.array(z.string())]).transform((val) =>
-  Array.isArray(val)
-    ? val
-    : val
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean)
-);
-
 export const blogPostFormSchema = z.object({
   title: z.string().min(3).max(200),
   slug: z

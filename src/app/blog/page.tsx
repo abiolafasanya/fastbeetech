@@ -37,7 +37,7 @@ export default async function BlogPage({
 
   return (
     <div className="min-h-screen bg-background text-foreground py-16 px-4 max-w-6xl mx-auto">
-      <h1 className="text-4xl font-bold mb-2 text-center">Fastbeetech Blog</h1>
+      <h1 className="text-4xl font-bold mb-2 text-center">Hexonest Blog</h1>
       <p className="text-center text-lg text-muted-foreground mb-8">
         Insights, tutorials, updates and engineering stories.
       </p>

@@ -17,6 +17,13 @@ interface ApiResponse<T = unknown> {
   data: T;
 }
 
+interface InternshipApplication {
+  _id: string;
+  name: string;
+  email: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
 class InternshipApi {
   private readonly url: string;
 
@@ -52,18 +59,35 @@ class InternshipApi {
   ): Promise<PaginatedResponse<Listing>> {
     const query = this.buildListingQuery(params);
 
-    const response: AxiosResponse<PaginatedResponse<Listing>> = await axios.get(
-      query
-    );
+    const response: AxiosResponse<PaginatedResponse<Listing>> =
+      await axios.get(query);
     return response.data;
   }
 
-  async findOne(id: string): Promise<ApiResponse<Listing>> {
+  async intenshipApplications(params: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+  }): Promise<ApiResponse<PaginatedResponse<InternshipApplication>>> {
+    const query = new QueryBuilder(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/internship/applications`
+    )
+      .set("page", params.page?.toString() || "1")
+      .set("pageSize", params.pageSize?.toString() || "10")
+      .set("search", params.search || "")
+      .build();
+
+    const response: AxiosResponse<
+      ApiResponse<PaginatedResponse<InternshipApplication>>
+    > = await axios.get(query);
+    return response.data;
+  }
+
+  async findOne(id: string): Promise<ApiResponse<InternshipApplication>> {
     const query = new QueryBuilder(`${this.url}/${id}`).build();
 
-    const response: AxiosResponse<ApiResponse<Listing>> = await axios.get(
-      query
-    );
+    const response: AxiosResponse<ApiResponse<InternshipApplication>> =
+      await axios.get(query);
     return response.data;
   }
 
@@ -74,6 +98,35 @@ class InternshipApi {
       query,
       payload
     );
+    return response.data;
+  }
+
+  async updateStatus(payload: {
+    id: string;
+    status: "accepted" | "rejected";
+  }): Promise<ApiResponse<{ status: "accepted" | "rejected" }>> {
+    const query = new QueryBuilder(`${this.url}/${payload.id}/status`).build();
+
+    const response: AxiosResponse<
+      ApiResponse<{ status: "accepted" | "rejected" }>
+    > = await axios.patch(query, { status: payload.status });
+    return response.data;
+  }
+
+  async sendMail(id: string): Promise<ApiResponse> {
+    const query = new QueryBuilder(
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/internship/applications/${id}`
+    ).build();
+
+    const response: AxiosResponse<ApiResponse> = await axios.post(query);
+    console.log("Send mail response:", query, response.data);
+    return response.data;
+  }
+
+  async delete(id: string): Promise<ApiResponse> {
+    const query = new QueryBuilder(`${this.url}/$${id}`).build();
+
+    const response: AxiosResponse<ApiResponse> = await axios.delete(query);
     return response.data;
   }
 }

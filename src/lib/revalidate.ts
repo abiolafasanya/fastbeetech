@@ -16,5 +16,7 @@ export async function triggerRevalidate(
       },
       body: JSON.stringify({ type, value: pathOrTag }),
     });
-  } catch (_) {}
+  } catch {
+    // Silently ignore revalidation errors
+  }
 }

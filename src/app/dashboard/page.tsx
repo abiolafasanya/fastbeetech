@@ -65,7 +65,7 @@ export default async function AdminHome() {
     cache: "no-store",
     // Forward cookies for auth-protected API routes
     headers: {
-      cookie: cookies().toString(),
+      cookie: (await cookies()).toString(),
     },
   });
 

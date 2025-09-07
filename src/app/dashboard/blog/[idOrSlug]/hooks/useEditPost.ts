@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -21,7 +20,6 @@ import { handleServerError } from "@/lib/errorHelper";
 const isObjectId = (s: string) => /^[a-f0-9]{24}$/i.test(s);
 
 export function useEditPost(idOrSlug: string) {
-  const router = useRouter();
   const qc = useQueryClient();
 
   // ---------- FETCH ----------
@@ -99,9 +97,9 @@ export function useEditPost(idOrSlug: string) {
       qc.invalidateQueries({ queryKey: ["blog", "post", idOrSlug] });
     },
     onError(error) {
-     if(error instanceof AxiosError) {
-      handleServerError(error)
-     }
+      if (error instanceof AxiosError) {
+        handleServerError(error);
+      }
     },
   });
 
