@@ -23,7 +23,10 @@ export interface AuthResponse {
 }
 
 // For responses that only include user (login - token is in HTTP-only cookie)
-export type LoginResponse = Pick<AuthResponse, 'user'>;
+export interface LoginResponse {
+  token?: string; // Temporarily add token for debugging
+  user: User;
+}
 
 export interface ResetPassword {
   email: string;

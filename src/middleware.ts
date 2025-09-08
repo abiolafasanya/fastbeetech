@@ -4,12 +4,15 @@ import { NextRequest, NextResponse } from "next/server";
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   const allCookies = request.cookies.getAll();
-  
+
   console.log("=== MIDDLEWARE DEBUG ===");
   console.log("Path:", request.nextUrl.pathname);
   console.log("Origin:", request.headers.get("origin"));
   console.log("Host:", request.headers.get("host"));
-  console.log("User-Agent:", request.headers.get("user-agent")?.substring(0, 50));
+  console.log(
+    "User-Agent:",
+    request.headers.get("user-agent")?.substring(0, 50)
+  );
   console.log("All cookies:", allCookies);
   console.log("Token cookie:", token);
   console.log("Cookie header:", request.headers.get("cookie"));
