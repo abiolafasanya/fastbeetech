@@ -15,7 +15,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   useAuthRedirect(); // Redirect to login if not authenticated
-  
+
   const collapsed = useSidebarCollapsed();
   const leftPad = collapsed ? SIDEBAR_W_COLLAPSED : SIDEBAR_W;
 
