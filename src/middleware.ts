@@ -1,10 +1,11 @@
 // middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
-
-  const protectedPaths = ["/dashboard", "/profile", "/admin", "/listings/add"];
+  console.log("Middleware invoked for path:", request.nextUrl.pathname);
+  console.log("Token from cookies:", token);
+  const protectedPaths = ["/dashboard", "/profile", "/admin"];
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
@@ -25,5 +26,5 @@ export function middleware(request: NextRequest) {
 
 // Apply to paths
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile", "/store", "/listings/add"],
+  matcher: ["/dashboard/:path*", "/profile", "/admin", "/dashboard"],
 };
