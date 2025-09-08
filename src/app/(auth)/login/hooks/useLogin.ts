@@ -41,28 +41,9 @@ export const useLogin = () => {
   }, [isLoggedOut, router]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
-    console.log("=== FRONTEND LOGIN DEBUG ===");
-    console.log("Making login request to:", process.env.NEXT_PUBLIC_BASE_URL);
-    console.log("Login data:", { email: data.email, password: "***" });
-
     const response = await mutation.mutateAsync(data);
 
-    console.log("Login response received:", {
-      status: response ? "success" : "failed",
-      user: response?.user?.email,
-      hasToken: !!response?.token,
-    });
-
-    // Since backend sets HTTP-only cookie, we don't need to manually set it
-    // But temporarily also set manually if token is in response
-    if (response?.token) {
-      console.log("Setting token manually from response");
-      document.cookie = `token=${response.token}; path=/; max-age=${
-        7 * 24 * 60 * 60
-      }; secure; samesite=lax`;
-    }
-
-    // Just update the auth store with user data
+    // Backend sets HTTP-only cookie automatically
     login(response.user);
 
     // Check for redirect from middleware

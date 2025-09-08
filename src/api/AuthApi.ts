@@ -24,7 +24,6 @@ export interface AuthResponse {
 
 // For responses that only include user (login - token is in HTTP-only cookie)
 export interface LoginResponse {
-  token?: string; // Temporarily add token for debugging
   user: User;
 }
 
