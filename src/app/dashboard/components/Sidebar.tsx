@@ -11,6 +11,7 @@ import {
   ChevronRight,
   LayoutGrid,
   Briefcase,
+  BookOpen,
 } from "lucide-react";
 import clsx from "clsx";
 import { useSidebarCollapsed, useToggleSidebar } from "@/store/dashboardUI";
@@ -57,6 +58,12 @@ export default function Sidebar() {
           href="/dashboard/blog"
           icon={<FileText className="w-4 h-4" />}
           label="Blog"
+          collapsed={collapsed}
+        />
+        <NavItem
+          href="/dashboard/course"
+          icon={<BookOpen className="w-4 h-4" />}
+          label="Courses"
           collapsed={collapsed}
         />
         <NavItem

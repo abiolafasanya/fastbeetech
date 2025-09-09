@@ -61,6 +61,9 @@ export default function Header() {
           >
             Internship
           </Link>
+          <Link href="/courses" className="text-sm font-medium hover:underline">
+            Courses
+          </Link>
           <Link href="/blog" className="text-sm font-medium hover:underline">
             Blog
           </Link>
@@ -117,6 +120,13 @@ export default function Header() {
                   className="text-sm font-medium"
                 >
                   Internship
+                </Link>
+                <Link
+                  href="/courses"
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm font-medium"
+                >
+                  Courses
                 </Link>
                 <Link
                   href="/blog"

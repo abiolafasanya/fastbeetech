@@ -9,7 +9,7 @@ export async function POST(
 ): Promise<Response> {
   const { id } = await context.params;
   // Forward cookies for authentication/session
-  const cookieHeader = cookies().toString();
+  const cookieHeader = (await cookies()).toString();
   const res = await fetch(`${API_BASE}/internship/${id}/send-mail`, {
     method: "POST",
     headers: {
