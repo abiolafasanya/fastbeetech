@@ -12,5 +12,7 @@ export function usePosts(params?: {
   return useQuery({
     queryKey: ["posts", params],
     queryFn: () => BlogApi.listPostAdmin(params),
+    // Prevent the query from running on server-side during build
+    enabled: typeof window !== "undefined",
   });
 }

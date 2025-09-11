@@ -10,7 +10,10 @@ interface ErrorResponse {
 }
 
 const axiosConfig = async (): Promise<void> => {
-  axios.defaults.baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+  // Set base URL with fallback for build time
+  axios.defaults.baseURL =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (typeof window !== "undefined" ? "" : "http://localhost:8000");
 
   // Enable credentials to send HTTP-only cookies
   axios.defaults.withCredentials = true;

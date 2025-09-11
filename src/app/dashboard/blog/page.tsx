@@ -6,6 +6,9 @@ import { Loader2, Plus, Trash2, Globe, Edit, CirclePower } from "lucide-react";
 import { usePosts } from "./hooks/usePost";
 import { usePostMutations } from "./hooks/usePostMutation";
 
+// Disable static generation for this page
+export const dynamic = "force-dynamic";
+
 type STATUS_TYPE = "all" | "draft" | "scheduled" | "published" | "archived";
 export default function BlogListPage() {
   const [status, setStatus] = useState<STATUS_TYPE>("all");
