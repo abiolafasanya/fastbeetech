@@ -247,10 +247,9 @@ export interface ApiResponse<T> {
 // };
 
 class CourseApi {
-  
   private readonly url = "/api/v1";
   // Public course endpoints
-   async getAllCourses(
+  async getAllCourses(
     params: {
       page?: number;
       limit?: number;
@@ -270,7 +269,7 @@ class CourseApi {
       status?: string;
     } = {}
   ): Promise<PaginatedResponse<Course>> {
-    const queryBuilder = new QueryBuilder(`${this.url}/courses`)
+    const queryBuilder = new QueryBuilder(`${this.url}/courses`);
     if (params.page) queryBuilder.set("page", params.page);
     if (params.limit) queryBuilder.set("limit", params.limit);
     if (params.search) queryBuilder.set("search", params.search);
@@ -285,7 +284,8 @@ class CourseApi {
     if (params.tags) queryBuilder.set("tags", params.tags.join(","));
     if (params.duration) queryBuilder.set("duration", params.duration);
     if (params.language) queryBuilder.set("language", params.language);
-    if (params.featured !== undefined) queryBuilder.set("featured", params.featured);
+    if (params.featured !== undefined)
+      queryBuilder.set("featured", params.featured);
     if (params.bestseller !== undefined)
       queryBuilder.set("bestseller", params.bestseller);
     if (params.status) queryBuilder.set("status", params.status);
@@ -294,24 +294,25 @@ class CourseApi {
     return response.data;
   }
 
-   async getCourse(
-    idOrSlug: string
-  ): Promise<ApiResponse<{ course: Course }>> {
+  async getCourse(idOrSlug: string): Promise<ApiResponse<{ course: Course }>> {
     const response = await axios.get(`${this.url}/courses/${idOrSlug}`);
     return response.data;
   }
 
-   async getReviews(
+  async getReviews(
     courseId: string,
     params: { page?: number; limit?: number; sortBy?: string } = {}
   ): Promise<PaginatedResponse<CourseReview>> {
-    const response = await axios.get(`${this.url}/courses/${courseId}/reviews`, {
-      params,
-    });
+    const response = await axios.get(
+      `${this.url}/courses/${courseId}/reviews`,
+      {
+        params,
+      }
+    );
     return response.data;
   }
 
-   async getCategories(): Promise<
+  async getCategories(): Promise<
     ApiResponse<{
       categories: Array<{
         _id: string;
@@ -324,7 +325,7 @@ class CourseApi {
     return response.data;
   }
 
-   async getInstructors(): Promise<
+  async getInstructors(): Promise<
     ApiResponse<{
       instructors: Array<{
         _id: string;
@@ -342,14 +343,14 @@ class CourseApi {
   }
 
   // Authenticated course endpoints
-   async createCourse(
+  async createCourse(
     data: CreateCourseData
   ): Promise<ApiResponse<{ course: Course }>> {
     const response = await axios.post(`${this.url}/courses`, data);
     return response.data;
   }
 
-   async updateCourse(
+  async updateCourse(
     id: string,
     data: Partial<CreateCourseData>
   ): Promise<ApiResponse<{ course: Course }>> {
@@ -357,34 +358,34 @@ class CourseApi {
     return response.data;
   }
 
-   async deleteCourse(id: string): Promise<ApiResponse<void>> {
+  async deleteCourse(id: string): Promise<ApiResponse<void>> {
     const response = await axios.delete(`${this.url}/courses/${id}`);
     return response.data;
   }
 
-   async publishCourse(
-    id: string
-  ): Promise<ApiResponse<{ course: Course }>> {
+  async publishCourse(id: string): Promise<ApiResponse<{ course: Course }>> {
     const response = await axios.patch(`${this.url}/courses/${id}/publish`);
     return response.data;
   }
 
   // Enrollment endpoints
-   async enrollInCourse(
+  async enrollInCourse(
     courseId: string
   ): Promise<ApiResponse<{ enrollment: CourseEnrollment }>> {
     const response = await axios.post(`${this.url}/courses/${courseId}/enroll`);
     return response.data;
   }
 
-   async unenrollFromCourse(
+  async unenrollFromCourse(
     courseId: string
   ): Promise<ApiResponse<{ enrollment: CourseEnrollment }>> {
-    const response = await axios.post(`${this.url}/courses/${courseId}/unenroll`);
+    const response = await axios.post(
+      `${this.url}/courses/${courseId}/unenroll`
+    );
     return response.data;
   }
 
-   async getMyCourses(
+  async getMyCourses(
     params: {
       status?: string;
       page?: number;
@@ -395,24 +396,54 @@ class CourseApi {
     return response.data;
   }
 
-  // Progress endpoints
-   async updateProgress(
-    courseId: string,
-    data: { contentId: string; completed: boolean; duration?: number }
-  ): Promise<ApiResponse<{ enrollment: CourseEnrollment }>> {
-    const response = await axios.put(`${this.url}/courses/${courseId}/progress`, data);
+  // Instructor dashboard endpoints
+  async getInstructorCourses(
+    params: {
+      status?: string;
+      page?: number;
+      limit?: number;
+      search?: string;
+    } = {}
+  ): Promise<PaginatedResponse<Course>> {
+    const response = await axios.get(`${this.url}/dashboard/courses`, {
+      params,
+    });
+    return response.data as PaginatedResponse<Course>;
+  }
+
+  // Get single course for instructor (includes draft/unpublished courses)
+  async getInstructorCourse(
+    idOrSlug: string
+  ): Promise<ApiResponse<{ course: Course }>> {
+    const response = await axios.get(
+      `${this.url}/dashboard/courses/${idOrSlug}`
+    );
     return response.data;
   }
 
-   async getProgress(
+  // Progress endpoints
+  async updateProgress(
+    courseId: string,
+    data: { contentId: string; completed: boolean; duration?: number }
+  ): Promise<ApiResponse<{ enrollment: CourseEnrollment }>> {
+    const response = await axios.put(
+      `${this.url}/courses/${courseId}/progress`,
+      data
+    );
+    return response.data;
+  }
+
+  async getProgress(
     courseId: string
   ): Promise<ApiResponse<{ enrollment: CourseEnrollment }>> {
-    const response = await axios.get(`${this.url}/courses/${courseId}/progress`);
+    const response = await axios.get(
+      `${this.url}/courses/${courseId}/progress`
+    );
     return response.data;
   }
 
   // Quiz endpoints
-   async submitQuiz(
+  async submitQuiz(
     courseId: string,
     quizId: string,
     data: { answers: Record<string, unknown> }
@@ -431,35 +462,44 @@ class CourseApi {
   }
 
   // Review endpoints
-   async addReview(
+  async addReview(
     courseId: string,
     data: { rating: number; review: string }
   ): Promise<ApiResponse<{ review: CourseReview }>> {
-    const response = await axios.post(`${this.url}/courses/${courseId}/review`, data);
+    const response = await axios.post(
+      `${this.url}/courses/${courseId}/review`,
+      data
+    );
     return response.data;
   }
 
-   async markReviewHelpful(
+  async markReviewHelpful(
     reviewId: string,
     data: { helpful: boolean }
   ): Promise<ApiResponse<{ helpful: number; userMarkedHelpful: boolean }>> {
-    const response = await axios.put(`${this.url}/reviews/${reviewId}/helpful`, data);
+    const response = await axios.put(
+      `${this.url}/reviews/${reviewId}/helpful`,
+      data
+    );
     return response.data;
   }
 
   // Analytics endpoints
-   async getAnalytics(
+  async getAnalytics(
     courseId: string,
     params: { dateFrom?: string; dateTo?: string; granularity?: string } = {}
   ): Promise<ApiResponse<{ analytics: unknown }>> {
-    const response = await axios.get(`${this.url}/courses/${courseId}/analytics`, {
-      params,
-    });
+    const response = await axios.get(
+      `${this.url}/courses/${courseId}/analytics`,
+      {
+        params,
+      }
+    );
     return response.data;
   }
 
   // Admin endpoints
-   async bulkUpdate(data: {
+  async bulkUpdate(data: {
     courseIds: string[];
     operation:
       | "publish"

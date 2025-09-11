@@ -136,6 +136,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans bg-background text-foreground`}
+        suppressHydrationWarning
       >
         <AppInitProvider>
           <Header />
@@ -193,4 +194,3 @@ export default function RootLayout({
     </html>
   );
 }
-

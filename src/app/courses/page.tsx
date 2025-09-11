@@ -28,6 +28,7 @@ import {
 const mockCourses = [
   {
     id: "1",
+    slug: "complete-web-development-bootcamp",
     title: "Complete Web Development Bootcamp",
     description:
       "Learn HTML, CSS, JavaScript, React, Node.js and more in this comprehensive course.",
@@ -48,6 +49,7 @@ const mockCourses = [
   },
   {
     id: "2",
+    slug: "advanced-react-typescript",
     title: "Advanced React & TypeScript",
     description:
       "Master React with TypeScript, hooks, context, and advanced patterns.",
@@ -68,6 +70,7 @@ const mockCourses = [
   },
   {
     id: "3",
+    slug: "python-for-data-science",
     title: "Python for Data Science",
     description:
       "Learn Python programming for data analysis, visualization, and machine learning.",
@@ -287,7 +290,7 @@ export default function CoursesPage() {
                       </span>
                     )}
                   </div>
-                  <Link href={`/courses/${course.id}`}>
+                  <Link href={`/course/${course.slug}`}>
                     <Button>Enroll Now</Button>
                   </Link>
                 </div>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import CourseApi  from "@/api/CourseApi";
+import CourseApi from "@/api/CourseApi";
 
 interface UseCoursesParams {
   page?: number;
@@ -78,5 +78,19 @@ export const useInstructors = () => {
     queryKey: ["instructors"],
     queryFn: () => CourseApi.getInstructors(),
     staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+export const useInstructorCourses = (
+  params: {
+    status?: string;
+    page?: number;
+    limit?: number;
+    search?: string;
+  } = {}
+) => {
+  return useQuery({
+    queryKey: ["instructor-courses", params],
+    queryFn: () => CourseApi.getInstructorCourses(params),
   });
 };

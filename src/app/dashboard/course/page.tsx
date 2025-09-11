@@ -17,8 +17,9 @@ import {
   DollarSign,
   Eye,
   MoreVertical,
+  Scroll,
 } from "lucide-react";
-import { useCourses } from "./hooks/useCourse";
+import { useInstructorCourses } from "./hooks/useCourse";
 import { useCourseMutations } from "./hooks/useCourseMutation";
 import { Course } from "../../../api/CourseApi";
 import { SimplePagination } from "@/components/ui/pagination";
@@ -50,6 +51,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type STATUS_TYPE = "all" | "draft" | "published" | "archived" | "coming-soon";
 
@@ -57,7 +59,7 @@ export default function CourseDashboard() {
   const [status, setStatus] = useState<STATUS_TYPE>("all");
   const pagination = usePagination({ itemsPerPage: 10 });
 
-  const { data, isLoading } = useCourses({
+  const { data, isLoading } = useInstructorCourses({
     ...pagination.getParams(),
     status: status === "all" ? undefined : status,
   });
@@ -235,11 +237,11 @@ export default function CourseDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Course</TableHead>
-                <TableHead>Status</TableHead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Course</TableHead>
+                  <TableHead>Status</TableHead>
                 <TableHead>Students</TableHead>
                 <TableHead>Rating</TableHead>
                 <TableHead>Price</TableHead>
@@ -393,7 +395,6 @@ export default function CourseDashboard() {
               ))}
             </TableBody>
           </Table>
-
           {data?.data?.courses?.length === 0 && (
             <div className="text-center py-10">
               <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />
