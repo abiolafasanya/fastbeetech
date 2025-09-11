@@ -96,6 +96,18 @@ export interface CourseContent {
     url: string;
     type: "pdf" | "zip" | "link" | "other";
   }>;
+  // Assignment-specific fields
+  assignmentInstructions?: string;
+  submissionFormat?: string[];
+  maxFileSize?: number;
+  dueDate?: string;
+  gradingRubric?: Array<{
+    criteria: string;
+    maxPoints: number;
+    description: string;
+  }>;
+  // Resource-specific fields
+  allowDownloads?: boolean;
   isPreview: boolean;
 }
 
@@ -119,8 +131,7 @@ export interface QuizQuestion {
   options?: string[];
   correctAnswer: string | string[];
   explanation?: string;
-  points: number;
-  order: number;
+  points?: number;
 }
 
 export interface CourseEnrollment {

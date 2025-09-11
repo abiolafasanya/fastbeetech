@@ -17,7 +17,6 @@ import {
   DollarSign,
   Eye,
   MoreVertical,
-  Scroll,
 } from "lucide-react";
 import { useInstructorCourses } from "./hooks/useCourse";
 import { useCourseMutations } from "./hooks/useCourseMutation";
@@ -33,14 +32,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,7 +43,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 type STATUS_TYPE = "all" | "draft" | "published" | "archived" | "coming-soon";
 
@@ -125,6 +116,189 @@ export default function CourseDashboard() {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  // Column definitions for DataTable
+  const columns = [
+    {
+      accessorKey: "course",
+      header: "Course",
+      cell: ({ row }: { row: { original: Course } }) => {
+        const course = row.original;
+        return (
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <Image
+                className="h-10 w-10 rounded-md object-cover"
+                src={course.thumbnail}
+                alt={course.title}
+                width={40}
+                height={40}
+              />
+            </div>
+            <div>
+              <div className="font-medium">{course.title}</div>
+              <div className="text-sm text-muted-foreground">
+                {course.shortDescription.slice(0, 50)}...
+              </div>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }: { row: { original: Course } }) => {
+        const course = row.original;
+        return (
+          <div>
+            <Badge className={getStatusColor(course.status)}>
+              {course.status}
+            </Badge>
+            {course.isFeatured && (
+              <Badge variant="secondary" className="ml-1">
+                Featured
+              </Badge>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "totalEnrollments",
+      header: "Students",
+      cell: ({ row }: { row: { original: Course } }) => {
+        const course = row.original;
+        return (
+          <div className="flex items-center">
+            <Users className="mr-1 h-4 w-4 text-muted-foreground" />
+            {course.totalEnrollments}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "averageRating",
+      header: "Rating",
+      cell: ({ row }: { row: { original: Course } }) => {
+        const course = row.original;
+        return (
+          <div className="flex items-center">
+            <Star className="mr-1 h-4 w-4 fill-yellow-400 text-yellow-400" />
+            {course.averageRating.toFixed(1)}
+            <span className="ml-1 text-sm text-muted-foreground">
+              ({course.totalReviews})
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "price",
+      header: "Price",
+      cell: ({ row }: { row: { original: Course } }) => {
+        const course = row.original;
+        return course.isFree ? (
+          <Badge variant="secondary">Free</Badge>
+        ) : (
+          <span className="font-medium">
+            {formatPrice(course.price, course.currency)}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "totalDuration",
+      header: "Duration",
+      cell: ({ row }: { row: { original: Course } }) => {
+        const course = row.original;
+        return (
+          <div className="flex items-center">
+            <Clock className="mr-1 h-4 w-4 text-muted-foreground" />
+            {formatDuration(course.totalDuration)}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "lastUpdated",
+      header: "Updated",
+      cell: ({ row }: { row: { original: Course } }) => {
+        const course = row.original;
+        return (
+          <div className="text-sm text-muted-foreground">
+            {new Date(course.lastUpdated).toLocaleDateString()}
+          </div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "",
+      cell: ({ row }: { row: { original: Course } }) => {
+        const course = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+              <Link href={`/dashboard/course/${course._id}/edit`}>
+                <DropdownMenuItem>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Course
+                </DropdownMenuItem>
+              </Link>
+
+              <Link href={`/course/${course.slug}`}>
+                <DropdownMenuItem>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Preview
+                </DropdownMenuItem>
+              </Link>
+
+              <Link href={`/dashboard/course/${course._id}/analytics`}>
+                <DropdownMenuItem>
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  Analytics
+                </DropdownMenuItem>
+              </Link>
+
+              <DropdownMenuSeparator />
+
+              {course.status === "draft" && (
+                <DropdownMenuItem onClick={() => handlePublish(course._id)}>
+                  <Globe className="mr-2 h-4 w-4" />
+                  Publish
+                </DropdownMenuItem>
+              )}
+
+              <DropdownMenuItem
+                onClick={() => handleFeature(course._id, !course.isFeatured)}
+              >
+                <Star className="mr-2 h-4 w-4" />
+                {course.isFeatured ? "Remove from Featured" : "Add to Featured"}
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                className="text-red-600"
+                onClick={() => handleDelete(course._id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Course
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -213,19 +387,31 @@ export default function CourseDashboard() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-4">
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value as STATUS_TYPE)}
-          className="flex h-10 w-[180px] items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <option value="all">All Status</option>
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-          <option value="archived">Archived</option>
-          <option value="coming-soon">Coming Soon</option>
-        </select>
+      {/* Filters and Search */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as STATUS_TYPE)}
+            className="flex h-10 w-[180px] items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="all">All Status</option>
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+            <option value="archived">Archived</option>
+            <option value="coming-soon">Coming Soon</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="relative w-64">
+            <input
+              type="text"
+              placeholder="Search courses..."
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Courses Table */}
@@ -237,164 +423,7 @@ export default function CourseDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Status</TableHead>
-                <TableHead>Students</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.data?.courses?.map((course: Course) => (
-                <TableRow key={course._id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0">
-                        <Image
-                          className="h-10 w-10 rounded-md object-cover"
-                          src={course.thumbnail}
-                          alt={course.title}
-                          width={40}
-                          height={40}
-                        />
-                      </div>
-                      <div>
-                        <div className="font-medium">{course.title}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {course.shortDescription.slice(0, 50)}...
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <Badge className={getStatusColor(course.status)}>
-                      {course.status}
-                    </Badge>
-                    {course.isFeatured && (
-                      <Badge variant="secondary" className="ml-1">
-                        Featured
-                      </Badge>
-                    )}
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="flex items-center">
-                      <Users className="mr-1 h-4 w-4 text-muted-foreground" />
-                      {course.totalEnrollments}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="flex items-center">
-                      <Star className="mr-1 h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      {course.averageRating.toFixed(1)}
-                      <span className="ml-1 text-sm text-muted-foreground">
-                        ({course.totalReviews})
-                      </span>
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    {course.isFree ? (
-                      <Badge variant="secondary">Free</Badge>
-                    ) : (
-                      <span className="font-medium">
-                        {formatPrice(course.price, course.currency)}
-                      </span>
-                    )}
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="flex items-center">
-                      <Clock className="mr-1 h-4 w-4 text-muted-foreground" />
-                      {formatDuration(course.totalDuration)}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="text-sm text-muted-foreground">
-                      {new Date(course.lastUpdated).toLocaleDateString()}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-                        <Link href={`/dashboard/course/${course._id}`}>
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Course
-                          </DropdownMenuItem>
-                        </Link>
-
-                        <Link href={`/course/${course.slug}`}>
-                          <DropdownMenuItem>
-                            <Eye className="mr-2 h-4 w-4" />
-                            Preview
-                          </DropdownMenuItem>
-                        </Link>
-
-                        <Link
-                          href={`/dashboard/course/${course._id}/analytics`}
-                        >
-                          <DropdownMenuItem>
-                            <TrendingUp className="mr-2 h-4 w-4" />
-                            Analytics
-                          </DropdownMenuItem>
-                        </Link>
-
-                        <DropdownMenuSeparator />
-
-                        {course.status === "draft" && (
-                          <DropdownMenuItem
-                            onClick={() => handlePublish(course._id)}
-                          >
-                            <Globe className="mr-2 h-4 w-4" />
-                            Publish
-                          </DropdownMenuItem>
-                        )}
-
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleFeature(course._id, !course.isFeatured)
-                          }
-                        >
-                          <Star className="mr-2 h-4 w-4" />
-                          {course.isFeatured
-                            ? "Remove from Featured"
-                            : "Add to Featured"}
-                        </DropdownMenuItem>
-
-                        <DropdownMenuSeparator />
-
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => handleDelete(course._id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete Course
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable columns={columns} data={data?.data?.courses || []} />
           {data?.data?.courses?.length === 0 && (
             <div className="text-center py-10">
               <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />

@@ -1,268 +1,221 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import CourseApi, {
-  CourseModule,
-  CourseContent,
-  Course,
-} from "@/api/CourseApi";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { toast } from "sonner";
+import { ArrowLeft, Save } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCourse, useUpdateCourse } from "@/hooks/course";
+import { Course } from "@/api/CourseApi";
+
+// Import our modular tab components
+import { BasicInformationTab } from "./components/BasicInformationTab";
+import { CourseContentTab } from "./components/CourseContentTab";
+import { LearningObjectivesTab } from "./components/LearningObjectivesTab";
+import { PricingTab } from "./components/PricingTab";
+
+// Enhanced course schema for comprehensive validation
+const courseSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  shortDescription: z
+    .string()
+    .min(20, "Short description must be at least 20 characters")
+    .max(200, "Short description must not exceed 200 characters"),
+  description: z.string().min(50, "Description must be at least 50 characters"),
+  thumbnail: z.string().min(1, "Please provide a thumbnail"),
+  previewVideo: z.string().optional(),
+  level: z.enum(["beginner", "intermediate", "advanced", "all-levels"]),
+  category: z.string().min(1, "Please select a category"),
+  subcategory: z.string().optional(),
+  price: z.number().min(0, "Price must be 0 or greater"),
+  isFree: z.boolean(),
+});
+
+type CourseFormData = z.infer<typeof courseSchema>;
 
 export default function CourseEditor() {
   const router = useRouter();
   const params = useParams() as { id: string };
   const courseId = params?.id;
 
-  const [loading, setLoading] = useState(false);
-  const [modules, setModules] = useState<CourseModule[]>([]);
-  const [title, setTitle] = useState("");
+  // Hooks for data management
+  const { data: courseData, isLoading } = useCourse(courseId);
+  const updateMutation = useUpdateCourse();
 
+  // UI state
+  const [activeTab, setActiveTab] = useState("basic");
+  const [thumbnailFiles, setThumbnailFiles] = useState<File[]>([]);
+  const [isUploadMode, setIsUploadMode] = useState(false);
+
+  // Course content state
+  const [modules, setModules] = useState<Course["modules"]>([]);
+  const [whatYouWillLearn, setWhatYouWillLearn] = useState<string[]>([""]);
+  const [prerequisites, setPrerequisites] = useState<string[]>([""]);
+  const [targetAudience, setTargetAudience] = useState<string[]>([""]);
+
+  // Form setup
+  const form = useForm<CourseFormData>({
+    resolver: zodResolver(courseSchema),
+    defaultValues: {
+      title: "",
+      shortDescription: "",
+      description: "",
+      thumbnail: "",
+      previewVideo: "",
+      level: "beginner",
+      category: "",
+      subcategory: "",
+      price: 0,
+      isFree: false,
+    },
+  });
+
+  // Load course data when available
   useEffect(() => {
-    if (!courseId) return;
-    setLoading(true);
-    CourseApi.getCourse(courseId)
-      .then((res) => {
-        const course = res.data.course as Course;
-        setTitle(course.title || "");
-        setModules(course.modules || []);
-      })
-      .catch(() => {
-        toast.error("Failed to load course");
-      })
-      .finally(() => setLoading(false));
-  }, [courseId]);
+    if (courseData?.data?.course) {
+      const course = courseData.data.course as Course;
 
-  const addModule = () => {
-    setModules([
-      ...modules,
-      {
-        title: "New Module",
-        description: "",
-        order: modules.length + 1,
-        contents: [
-          {
-            title: "New Content",
-            description: "",
-            type: "text",
-            order: 1,
-            isPreview: false,
-          } as CourseContent,
-        ],
-      } as CourseModule,
-    ]);
-  };
+      // Set form values
+      form.reset({
+        title: course.title || "",
+        shortDescription: course.shortDescription || "",
+        description: course.description || "",
+        thumbnail: course.thumbnail || "",
+        previewVideo: course.previewVideo || "",
+        level: course.level || "beginner",
+        category: course.category || "",
+        subcategory: course.subcategory || "",
+        price: course.price || 0,
+        isFree: course.isFree || false,
+      });
 
-  const updateModule = (index: number, patch: Partial<CourseModule>) => {
-    setModules((prev) =>
-      prev.map((m, i) => (i === index ? { ...m, ...patch } : m))
-    );
-  };
+      // Set course content
+      setModules(course.modules || []);
+      setWhatYouWillLearn(course.whatYouWillLearn || [""]);
+      setPrerequisites(course.prerequisites || [""]);
+      setTargetAudience(course.targetAudience || [""]);
+    }
+  }, [courseData, form]);
 
-  const removeModule = (index: number) => {
-    setModules((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const addContent = (moduleIndex: number) => {
-    setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
-          ? {
-              ...m,
-              contents: [
-                ...m.contents,
-                {
-                  title: "New Content",
-                  description: "",
-                  type: "text",
-                  order: m.contents.length + 1,
-                  isPreview: false,
-                } as CourseContent,
-              ],
-            }
-          : m
-      )
-    );
-  };
-
-  const updateContent = (
-    moduleIndex: number,
-    contentIndex: number,
-    patch: Partial<CourseContent>
-  ) => {
-    setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
-          ? {
-              ...m,
-              contents: m.contents.map((c, ci) =>
-                ci === contentIndex ? { ...c, ...patch } : c
-              ),
-            }
-          : m
-      )
-    );
-  };
-
-  const removeContent = (moduleIndex: number, contentIndex: number) => {
-    setModules((prev) =>
-      prev.map((m, i) =>
-        i === moduleIndex
-          ? {
-              ...m,
-              contents: m.contents.filter((_, ci) => ci !== contentIndex),
-            }
-          : m
-      )
-    );
-  };
-
-  const sanitizeModules = (mods: CourseModule[]) => {
-    return mods.map((m) => ({
-      ...m,
-      description: m.description?.trim() || undefined,
-      contents: m.contents
-        .map((c) => {
-          const content: CourseContent = { ...c } as CourseContent;
-          if (
-            typeof content.videoUrl === "string" &&
-            content.videoUrl.trim() === ""
-          ) {
-            const rec = content as unknown as Record<string, unknown>;
-            delete rec.videoUrl;
-          }
-          if (Array.isArray(content.resources)) {
-            content.resources = content.resources
-              .map((r) => ({
-                ...r,
-                title: r.title?.trim(),
-                url: r.url?.trim(),
-              }))
-              .filter((r) => r.title && r.url) as CourseContent["resources"];
-          }
-          return content;
-        })
-        .filter((c) => c.title && c.type),
-    }));
-  };
-
-  const onSave = async () => {
-    if (!courseId) return;
+  // Form submission
+  const onSubmit = async (data: CourseFormData) => {
     try {
-      setLoading(true);
-      const payload = {
-        modules: sanitizeModules(modules),
+      const courseData = {
+        ...data,
+        modules: modules.filter((m) => m.title && m.contents.length > 0),
+        whatYouWillLearn: whatYouWillLearn.filter((item) => item.trim() !== ""),
+        prerequisites: prerequisites.filter((item) => item.trim() !== ""),
+        targetAudience: targetAudience.filter((item) => item.trim() !== ""),
       };
-      await CourseApi.updateCourse(courseId, payload);
-      toast.success("Modules updated");
+
+      await updateMutation.mutateAsync({
+        id: courseId,
+        data: courseData,
+      });
+
+      toast.success("Course updated successfully!");
       router.push("/dashboard/course");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update modules");
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      toast.error("Failed to update course");
+      console.error("Course update error:", error);
     }
   };
 
-  return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Edit Modules - {title}</h1>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => router.push("/dashboard/course")}
-            variant="outline"
-          >
-            Back
-          </Button>
-          <Button onClick={onSave}>
-            {loading ? "Saving..." : "Save Modules"}
-          </Button>
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" onClick={() => router.back()}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Loading Course...</h1>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
       </div>
+    );
+  }
 
-      <div className="space-y-4">
-        {modules.map((m, mi) => (
-          <Card key={mi}>
-            <CardHeader className="flex items-center justify-between">
-              <CardTitle>
-                <Input
-                  value={m.title}
-                  onChange={(e) => updateModule(mi, { title: e.target.value })}
-                />
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={() => addContent(mi)}>
-                  Add Content
-                </Button>
-                <Button variant="destructive" onClick={() => removeModule(mi)}>
-                  Remove Module
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {m.contents.map((c, ci) => (
-                  <div key={ci} className="p-2 border rounded">
-                    <div className="grid grid-cols-2 gap-2">
-                      <Input
-                        value={c.title}
-                        onChange={(e) =>
-                          updateContent(mi, ci, { title: e.target.value })
-                        }
-                      />
-                      <select
-                        value={c.type}
-                        onChange={(e) =>
-                          updateContent(mi, ci, {
-                            type: e.target.value as CourseContent["type"],
-                          })
-                        }
-                      >
-                        <option value="video">Video</option>
-                        <option value="text">Text</option>
-                        <option value="quiz">Quiz</option>
-                        <option value="assignment">Assignment</option>
-                        <option value="resource">Resource</option>
-                      </select>
-                    </div>
-                    <Textarea
-                      value={c.description || ""}
-                      onChange={(e) =>
-                        updateContent(mi, ci, { description: e.target.value })
-                      }
-                    />
-                    {c.type === "video" && (
-                      <Input
-                        placeholder="Video URL"
-                        value={(c.videoUrl as string) || ""}
-                        onChange={(e) =>
-                          updateContent(mi, ci, { videoUrl: e.target.value })
-                        }
-                      />
-                    )}
-                    <div className="flex items-center gap-2 mt-2">
-                      <Button
-                        variant="destructive"
-                        onClick={() => removeContent(mi, ci)}
-                      >
-                        Remove Content
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Edit Course</h1>
+            <p className="text-muted-foreground">
+              Update your course content and settings
+            </p>
+          </div>
+        </div>
+        <Button
+          type="submit"
+          form="course-form"
+          disabled={updateMutation.isPending}
+        >
+          <Save className="mr-2 h-4 w-4" />
+          {updateMutation.isPending ? "Saving..." : "Save Changes"}
+        </Button>
       </div>
 
-      <div>
-        <Button onClick={addModule}>Add Module</Button>
-      </div>
+      <Form {...form}>
+        <form
+          id="course-form"
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="basic">Basic Info</TabsTrigger>
+              <TabsTrigger value="content">Course Content</TabsTrigger>
+              <TabsTrigger value="objectives">Learning Goals</TabsTrigger>
+              <TabsTrigger value="pricing">Pricing</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="basic" className="space-y-6">
+              <BasicInformationTab
+                form={form}
+                isUploadMode={isUploadMode}
+                setIsUploadMode={setIsUploadMode}
+                thumbnailFiles={thumbnailFiles}
+                setThumbnailFiles={setThumbnailFiles}
+              />
+            </TabsContent>
+
+            <TabsContent value="content" className="space-y-6">
+              <CourseContentTab modules={modules} setModules={setModules} />
+            </TabsContent>
+
+            <TabsContent value="objectives" className="space-y-6">
+              <LearningObjectivesTab
+                whatYouWillLearn={whatYouWillLearn}
+                setWhatYouWillLearn={setWhatYouWillLearn}
+                prerequisites={prerequisites}
+                setPrerequisites={setPrerequisites}
+                targetAudience={targetAudience}
+                setTargetAudience={setTargetAudience}
+              />
+            </TabsContent>
+
+            <TabsContent value="pricing" className="space-y-6">
+              <PricingTab form={form} />
+            </TabsContent>
+          </Tabs>
+        </form>
+      </Form>
     </div>
   );
 }
