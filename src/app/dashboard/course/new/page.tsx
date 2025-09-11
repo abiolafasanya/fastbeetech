@@ -4,13 +4,22 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Trash2, ArrowLeft, Save } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  ArrowLeft,
+  Save,
+  Upload,
+  Link as LinkIcon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -28,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { useCourseMutations } from "../hooks/useCourseMutation";
 import { CreateCourseData, CourseModule, CourseContent } from "@/api/CourseApi";
+import UploadApiInstance, { UploadResponse } from "@/api/UploadApi";
 
 const courseSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -36,7 +46,7 @@ const courseSchema = z.object({
     .min(20, "Short description must be at least 20 characters")
     .max(200),
   description: z.string().min(50, "Description must be at least 50 characters"),
-  thumbnail: z.string().url("Please enter a valid thumbnail URL"),
+  thumbnail: z.string().min(1, "Please provide a thumbnail"),
   previewVideo: z.string().optional(),
   level: z.enum(["beginner", "intermediate", "advanced", "all-levels"]),
   category: z.string().min(1, "Please select a category"),
@@ -55,6 +65,54 @@ export default function CreateCoursePage() {
   const [whatYouWillLearn, setWhatYouWillLearn] = useState<string[]>([""]);
   const [targetAudience, setTargetAudience] = useState<string[]>([""]);
   const [prerequisites, setPrerequisites] = useState<string[]>([]);
+
+  // Thumbnail upload state
+  const [isUploadMode, setIsUploadMode] = useState(false);
+  const [thumbnailFiles, setThumbnailFiles] = useState<File[]>([]);
+  const [dragOver, setDragOver] = useState(false);
+
+  // Upload mutation
+  const uploadMutation = useMutation<UploadResponse, Error, FormData>({
+    mutationFn: (formData: FormData) => UploadApiInstance.uploads(formData),
+    onSuccess: (response) => {
+      form.setValue("thumbnail", response.urls[0]);
+      toast.success("Thumbnail uploaded successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to upload thumbnail");
+      console.error("Upload error:", error);
+    },
+  });
+
+  // File upload handlers
+  const handleFileSelect = (files: FileList | null) => {
+    if (files && files.length > 0) {
+      const fileArray = Array.from(files);
+      setThumbnailFiles(fileArray);
+      handleThumbnailUpload(fileArray);
+    }
+  };
+
+  const handleThumbnailUpload = async (files: File[]) => {
+    const formData = new FormData();
+    formData.append("images", files[0]);
+    await uploadMutation.mutateAsync(formData);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    handleFileSelect(e.dataTransfer.files);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
 
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
@@ -289,22 +347,102 @@ export default function CreateCoursePage() {
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="thumbnail"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Thumbnail URL</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="https://example.com/image.jpg"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                {/* Thumbnail Upload */}
+                <div className="space-y-4">
+                  <FormLabel>Course Thumbnail</FormLabel>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      type="button"
+                      variant={isUploadMode ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setIsUploadMode(true)}
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload File
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={!isUploadMode ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setIsUploadMode(false)}
+                    >
+                      <LinkIcon className="mr-2 h-4 w-4" />
+                      Use URL
+                    </Button>
+                  </div>
+
+                  {isUploadMode ? (
+                    <div className="space-y-4">
+                      <div
+                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                          dragOver
+                            ? "border-primary bg-primary/5"
+                            : "border-gray-300 hover:border-gray-400"
+                        }`}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                      >
+                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                        <p className="mt-2 text-sm text-gray-600">
+                          Drop your thumbnail here, or{" "}
+                          <label className="text-primary cursor-pointer hover:underline">
+                            browse files
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleFileSelect(e.target.files)}
+                            />
+                          </label>
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          PNG, JPG, GIF up to 10MB
+                        </p>
+                      </div>
+
+                      {thumbnailFiles.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Selected File:</p>
+                          {thumbnailFiles.map((file, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                            >
+                              <span className="text-sm">{file.name}</span>
+                              <Badge variant="secondary">
+                                {(file.size / 1024 / 1024).toFixed(2)} MB
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {uploadMutation.isPending && (
+                        <div className="flex items-center justify-center p-4">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                          <span className="ml-2 text-sm">Uploading...</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="thumbnail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="https://example.com/image.jpg"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
+                </div>
 
                 <FormField
                   control={form.control}

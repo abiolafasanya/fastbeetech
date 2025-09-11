@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +14,7 @@ import {
 import { ChevronDown, ChevronUp, Trash2, Plus, FileText } from "lucide-react";
 import { CourseModule } from "@/api/CourseApi";
 import { ContentItem } from "./ContentItem";
+import { ContentPreview } from "./ContentPreview";
 
 interface ModuleItemProps {
   module: CourseModule;
@@ -46,6 +48,8 @@ export function ModuleItem({
   onUpdateContent,
   onRemoveContent,
 }: ModuleItemProps) {
+  const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
+
   return (
     <Collapsible open={isExpanded} onOpenChange={onToggle}>
       <Card className="border-l-4 border-l-blue-500">
@@ -102,26 +106,56 @@ export function ModuleItem({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-semibold">Module Content</h4>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => onAddContent(moduleIndex)}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Content
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={viewMode === "edit" ? "default" : "outline"}
+                    onClick={() => setViewMode("edit")}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={viewMode === "preview" ? "default" : "outline"}
+                    onClick={() => setViewMode("preview")}
+                  >
+                    Preview
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => onAddContent(moduleIndex)}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Content
+                  </Button>
+                </div>
               </div>
 
-              {module.contents.map((content, contentIndex) => (
-                <ContentItem
-                  key={contentIndex}
-                  content={content}
-                  moduleIndex={moduleIndex}
-                  contentIndex={contentIndex}
-                  onUpdate={onUpdateContent}
-                  onRemove={onRemoveContent}
-                />
-              ))}
+              {viewMode === "edit" ? (
+                // Edit Mode - Show ContentItem components
+                <>
+                  {module.contents.map((content, contentIndex) => (
+                    <ContentItem
+                      key={contentIndex}
+                      content={content}
+                      moduleIndex={moduleIndex}
+                      contentIndex={contentIndex}
+                      onUpdate={onUpdateContent}
+                      onRemove={onRemoveContent}
+                    />
+                  ))}
+                </>
+              ) : (
+                // Preview Mode - Show ContentPreview components
+                <>
+                  {module.contents.map((content, contentIndex) => (
+                    <ContentPreview key={contentIndex} content={content} />
+                  ))}
+                </>
+              )}
 
               {module.contents.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">

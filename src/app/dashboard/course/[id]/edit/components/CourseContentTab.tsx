@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, BookOpen } from "lucide-react";
 import { CourseModule, CourseContent } from "@/api/CourseApi";
 import { ModuleItem } from "./ModuleItem";
+import { CourseContentDemo } from "./CourseContentDemo";
 
 interface CourseContentTabProps {
   modules: CourseModule[];
@@ -138,6 +139,8 @@ export function CourseContentTab({
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
+        {modules.length === 0 && <CourseContentDemo onLoadDemo={setModules} />}
+
         {modules.map((module: CourseModule, moduleIndex: number) => (
           <ModuleItem
             key={moduleIndex}

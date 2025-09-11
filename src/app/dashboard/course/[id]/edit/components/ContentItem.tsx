@@ -188,7 +188,7 @@ export function ContentItem({
               <HelpCircle className="h-5 w-5 text-blue-600" />
               <h4 className="font-semibold text-blue-800">Quiz Settings</h4>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-3">
               <Input
                 placeholder="Time limit (minutes)"
@@ -295,7 +295,10 @@ export function ContentItem({
                     };
                     onUpdate(moduleIndex, contentIndex, "quiz", {
                       ...content.quiz,
-                      questions: [...(content.quiz?.questions || []), newQuestion],
+                      questions: [
+                        ...(content.quiz?.questions || []),
+                        newQuestion,
+                      ],
                     });
                   }}
                 >
@@ -305,17 +308,23 @@ export function ContentItem({
               </div>
 
               {content.quiz?.questions?.map((question, questionIndex) => (
-                <div key={questionIndex} className="p-3 border rounded-lg bg-white space-y-2">
+                <div
+                  key={questionIndex}
+                  className="p-3 border rounded-lg bg-white space-y-2"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Question {questionIndex + 1}</span>
+                    <span className="text-sm font-medium">
+                      Question {questionIndex + 1}
+                    </span>
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        const updatedQuestions = content.quiz?.questions?.filter(
-                          (_, idx) => idx !== questionIndex
-                        ) || [];
+                        const updatedQuestions =
+                          content.quiz?.questions?.filter(
+                            (_, idx) => idx !== questionIndex
+                          ) || [];
                         onUpdate(moduleIndex, contentIndex, "quiz", {
                           ...content.quiz,
                           questions: updatedQuestions,
@@ -325,12 +334,14 @@ export function ContentItem({
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  
+
                   <Textarea
                     placeholder="Enter your question"
                     value={question.question || ""}
                     onChange={(e) => {
-                      const updatedQuestions = [...(content.quiz?.questions || [])];
+                      const updatedQuestions = [
+                        ...(content.quiz?.questions || []),
+                      ];
                       updatedQuestions[questionIndex] = {
                         ...question,
                         question: e.target.value,
@@ -347,11 +358,20 @@ export function ContentItem({
                     <Select
                       value={question.type || "multiple-choice"}
                       onValueChange={(value) => {
-                        const updatedQuestions = [...(content.quiz?.questions || [])];
+                        const updatedQuestions = [
+                          ...(content.quiz?.questions || []),
+                        ];
                         updatedQuestions[questionIndex] = {
                           ...question,
-                          type: value as "multiple-choice" | "true-false" | "fill-blank" | "code-review",
-                          options: value === "multiple-choice" ? ["", "", "", ""] : undefined,
+                          type: value as
+                            | "multiple-choice"
+                            | "true-false"
+                            | "fill-blank"
+                            | "code-review",
+                          options:
+                            value === "multiple-choice"
+                              ? ["", "", "", ""]
+                              : undefined,
                         };
                         onUpdate(moduleIndex, contentIndex, "quiz", {
                           ...content.quiz,
@@ -363,9 +383,13 @@ export function ContentItem({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                        <SelectItem value="multiple-choice">
+                          Multiple Choice
+                        </SelectItem>
                         <SelectItem value="true-false">True/False</SelectItem>
-                        <SelectItem value="fill-blank">Fill in the Blank</SelectItem>
+                        <SelectItem value="fill-blank">
+                          Fill in the Blank
+                        </SelectItem>
                         <SelectItem value="code-review">Code Review</SelectItem>
                       </SelectContent>
                     </Select>
@@ -376,7 +400,9 @@ export function ContentItem({
                       min="1"
                       value={question.points || 1}
                       onChange={(e) => {
-                        const updatedQuestions = [...(content.quiz?.questions || [])];
+                        const updatedQuestions = [
+                          ...(content.quiz?.questions || []),
+                        ];
                         updatedQuestions[questionIndex] = {
                           ...question,
                           points: parseInt(e.target.value) || 1,
@@ -393,13 +419,20 @@ export function ContentItem({
                     <div className="space-y-2">
                       <span className="text-sm font-medium">Options:</span>
                       {question.options?.map((option, optionIndex) => (
-                        <div key={optionIndex} className="flex items-center gap-2">
+                        <div
+                          key={optionIndex}
+                          className="flex items-center gap-2"
+                        >
                           <Input
                             placeholder={`Option ${optionIndex + 1}`}
                             value={option || ""}
                             onChange={(e) => {
-                              const updatedQuestions = [...(content.quiz?.questions || [])];
-                              const updatedOptions = [...(question.options || [])];
+                              const updatedQuestions = [
+                                ...(content.quiz?.questions || []),
+                              ];
+                              const updatedOptions = [
+                                ...(question.options || []),
+                              ];
                               updatedOptions[optionIndex] = e.target.value;
                               updatedQuestions[questionIndex] = {
                                 ...question,
@@ -415,7 +448,9 @@ export function ContentItem({
                             checked={question.correctAnswer === option}
                             onCheckedChange={(checked) => {
                               if (checked) {
-                                const updatedQuestions = [...(content.quiz?.questions || [])];
+                                const updatedQuestions = [
+                                  ...(content.quiz?.questions || []),
+                                ];
                                 updatedQuestions[questionIndex] = {
                                   ...question,
                                   correctAnswer: option,
@@ -427,7 +462,9 @@ export function ContentItem({
                               }
                             }}
                           />
-                          <span className="text-xs text-muted-foreground">Correct</span>
+                          <span className="text-xs text-muted-foreground">
+                            Correct
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -435,11 +472,15 @@ export function ContentItem({
 
                   {question.type === "true-false" && (
                     <div className="space-y-2">
-                      <span className="text-sm font-medium">Correct Answer:</span>
+                      <span className="text-sm font-medium">
+                        Correct Answer:
+                      </span>
                       <Select
-                        value={question.correctAnswer as string || ""}
+                        value={(question.correctAnswer as string) || ""}
                         onValueChange={(value) => {
-                          const updatedQuestions = [...(content.quiz?.questions || [])];
+                          const updatedQuestions = [
+                            ...(content.quiz?.questions || []),
+                          ];
                           updatedQuestions[questionIndex] = {
                             ...question,
                             correctAnswer: value,
@@ -461,14 +502,19 @@ export function ContentItem({
                     </div>
                   )}
 
-                  {(question.type === "fill-blank" || question.type === "code-review") && (
+                  {(question.type === "fill-blank" ||
+                    question.type === "code-review") && (
                     <div className="space-y-2">
-                      <span className="text-sm font-medium">Correct Answer:</span>
+                      <span className="text-sm font-medium">
+                        Correct Answer:
+                      </span>
                       <Input
                         placeholder="Enter the correct answer"
-                        value={question.correctAnswer as string || ""}
+                        value={(question.correctAnswer as string) || ""}
                         onChange={(e) => {
-                          const updatedQuestions = [...(content.quiz?.questions || [])];
+                          const updatedQuestions = [
+                            ...(content.quiz?.questions || []),
+                          ];
                           updatedQuestions[questionIndex] = {
                             ...question,
                             correctAnswer: e.target.value,
@@ -486,7 +532,9 @@ export function ContentItem({
                     placeholder="Explanation (optional)"
                     value={question.explanation || ""}
                     onChange={(e) => {
-                      const updatedQuestions = [...(content.quiz?.questions || [])];
+                      const updatedQuestions = [
+                        ...(content.quiz?.questions || []),
+                      ];
                       updatedQuestions[questionIndex] = {
                         ...question,
                         explanation: e.target.value,
@@ -501,7 +549,8 @@ export function ContentItem({
                 </div>
               ))}
 
-              {(!content.quiz?.questions || content.quiz.questions.length === 0) && (
+              {(!content.quiz?.questions ||
+                content.quiz.questions.length === 0) && (
                 <div className="text-center py-4 text-muted-foreground">
                   <HelpCircle className="mx-auto h-8 w-8 mb-2" />
                   <p className="text-sm">No questions added yet</p>
@@ -516,67 +565,101 @@ export function ContentItem({
           <div className="space-y-4 p-4 border rounded-lg bg-green-50">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-green-600" />
-              <h4 className="font-semibold text-green-800">Assignment Settings</h4>
+              <h4 className="font-semibold text-green-800">
+                Assignment Settings
+              </h4>
             </div>
 
             <Textarea
               placeholder="Assignment instructions"
               value={content.assignmentInstructions || ""}
               onChange={(e) =>
-                onUpdate(moduleIndex, contentIndex, "assignmentInstructions", e.target.value)
+                onUpdate(
+                  moduleIndex,
+                  contentIndex,
+                  "assignmentInstructions",
+                  e.target.value
+                )
               }
               rows={4}
             />
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Due Date (Optional)</label>
+                <label className="text-sm font-medium">
+                  Due Date (Optional)
+                </label>
                 <Input
                   type="datetime-local"
                   value={content.dueDate || ""}
                   onChange={(e) =>
-                    onUpdate(moduleIndex, contentIndex, "dueDate", e.target.value)
+                    onUpdate(
+                      moduleIndex,
+                      contentIndex,
+                      "dueDate",
+                      e.target.value
+                    )
                   }
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Max File Size (MB)</label>
+                <label className="text-sm font-medium">
+                  Max File Size (MB)
+                </label>
                 <Input
                   type="number"
                   min="1"
                   max="100"
                   value={content.maxFileSize || 10}
                   onChange={(e) =>
-                    onUpdate(moduleIndex, contentIndex, "maxFileSize", parseInt(e.target.value) || 10)
+                    onUpdate(
+                      moduleIndex,
+                      contentIndex,
+                      "maxFileSize",
+                      parseInt(e.target.value) || 10
+                    )
                   }
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Allowed Submission Formats</label>
+              <label className="text-sm font-medium">
+                Allowed Submission Formats
+              </label>
               <div className="flex flex-wrap gap-2">
-                {["pdf", "doc", "docx", "txt", "zip", "ppt", "pptx"].map((format) => (
-                  <div key={format} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`format-${format}-${moduleIndex}-${contentIndex}`}
-                      checked={content.submissionFormat?.includes(format) || false}
-                      onCheckedChange={(checked) => {
-                        const currentFormats = content.submissionFormat || [];
-                        const updatedFormats = checked
-                          ? [...currentFormats, format]
-                          : currentFormats.filter((f: string) => f !== format);
-                        onUpdate(moduleIndex, contentIndex, "submissionFormat", updatedFormats);
-                      }}
-                    />
-                    <label
-                      htmlFor={`format-${format}-${moduleIndex}-${contentIndex}`}
-                      className="text-sm uppercase"
-                    >
-                      {format}
-                    </label>
-                  </div>
-                ))}
+                {["pdf", "doc", "docx", "txt", "zip", "ppt", "pptx"].map(
+                  (format) => (
+                    <div key={format} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`format-${format}-${moduleIndex}-${contentIndex}`}
+                        checked={
+                          content.submissionFormat?.includes(format) || false
+                        }
+                        onCheckedChange={(checked) => {
+                          const currentFormats = content.submissionFormat || [];
+                          const updatedFormats = checked
+                            ? [...currentFormats, format]
+                            : currentFormats.filter(
+                                (f: string) => f !== format
+                              );
+                          onUpdate(
+                            moduleIndex,
+                            contentIndex,
+                            "submissionFormat",
+                            updatedFormats
+                          );
+                        }}
+                      />
+                      <label
+                        htmlFor={`format-${format}-${moduleIndex}-${contentIndex}`}
+                        className="text-sm uppercase"
+                      >
+                        {format}
+                      </label>
+                    </div>
+                  )
+                )}
               </div>
             </div>
 
@@ -604,71 +687,120 @@ export function ContentItem({
                 </Button>
               </div>
 
-              {content.gradingRubric?.map((rubric: { criteria: string; maxPoints: number; description: string }, rubricIndex: number) => (
-                <div key={rubricIndex} className="p-3 border rounded-lg bg-white space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Criteria {rubricIndex + 1}</span>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        const updatedRubric = content.gradingRubric?.filter(
-                          (_: { criteria: string; maxPoints: number; description: string }, idx: number) => idx !== rubricIndex
-                        ) || [];
-                        onUpdate(moduleIndex, contentIndex, "gradingRubric", updatedRubric);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+              {content.gradingRubric?.map(
+                (
+                  rubric: {
+                    criteria: string;
+                    maxPoints: number;
+                    description: string;
+                  },
+                  rubricIndex: number
+                ) => (
+                  <div
+                    key={rubricIndex}
+                    className="p-3 border rounded-lg bg-white space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Criteria {rubricIndex + 1}
+                      </span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const updatedRubric =
+                            content.gradingRubric?.filter(
+                              (
+                                _: {
+                                  criteria: string;
+                                  maxPoints: number;
+                                  description: string;
+                                },
+                                idx: number
+                              ) => idx !== rubricIndex
+                            ) || [];
+                          onUpdate(
+                            moduleIndex,
+                            contentIndex,
+                            "gradingRubric",
+                            updatedRubric
+                          );
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <Input
-                      placeholder="Criteria name"
-                      value={rubric.criteria || ""}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder="Criteria name"
+                        value={rubric.criteria || ""}
+                        onChange={(e) => {
+                          const updatedRubric = [
+                            ...(content.gradingRubric || []),
+                          ];
+                          updatedRubric[rubricIndex] = {
+                            ...rubric,
+                            criteria: e.target.value,
+                          };
+                          onUpdate(
+                            moduleIndex,
+                            contentIndex,
+                            "gradingRubric",
+                            updatedRubric
+                          );
+                        }}
+                      />
+                      <Input
+                        placeholder="Max points"
+                        type="number"
+                        min="1"
+                        value={rubric.maxPoints || 10}
+                        onChange={(e) => {
+                          const updatedRubric = [
+                            ...(content.gradingRubric || []),
+                          ];
+                          updatedRubric[rubricIndex] = {
+                            ...rubric,
+                            maxPoints: parseInt(e.target.value) || 10,
+                          };
+                          onUpdate(
+                            moduleIndex,
+                            contentIndex,
+                            "gradingRubric",
+                            updatedRubric
+                          );
+                        }}
+                      />
+                    </div>
+
+                    <Textarea
+                      placeholder="Criteria description"
+                      value={rubric.description || ""}
                       onChange={(e) => {
-                        const updatedRubric = [...(content.gradingRubric || [])];
+                        const updatedRubric = [
+                          ...(content.gradingRubric || []),
+                        ];
                         updatedRubric[rubricIndex] = {
                           ...rubric,
-                          criteria: e.target.value,
+                          description: e.target.value,
                         };
-                        onUpdate(moduleIndex, contentIndex, "gradingRubric", updatedRubric);
+                        onUpdate(
+                          moduleIndex,
+                          contentIndex,
+                          "gradingRubric",
+                          updatedRubric
+                        );
                       }}
-                    />
-                    <Input
-                      placeholder="Max points"
-                      type="number"
-                      min="1"
-                      value={rubric.maxPoints || 10}
-                      onChange={(e) => {
-                        const updatedRubric = [...(content.gradingRubric || [])];
-                        updatedRubric[rubricIndex] = {
-                          ...rubric,
-                          maxPoints: parseInt(e.target.value) || 10,
-                        };
-                        onUpdate(moduleIndex, contentIndex, "gradingRubric", updatedRubric);
-                      }}
+                      rows={2}
                     />
                   </div>
+                )
+              )}
 
-                  <Textarea
-                    placeholder="Criteria description"
-                    value={rubric.description || ""}
-                    onChange={(e) => {
-                      const updatedRubric = [...(content.gradingRubric || [])];
-                      updatedRubric[rubricIndex] = {
-                        ...rubric,
-                        description: e.target.value,
-                      };
-                      onUpdate(moduleIndex, contentIndex, "gradingRubric", updatedRubric);
-                    }}
-                    rows={2}
-                  />
-                </div>
-              ))}
-
-              {(!content.gradingRubric || content.gradingRubric.length === 0) && (
+              {(!content.gradingRubric ||
+                content.gradingRubric.length === 0) && (
                 <div className="text-center py-4 text-muted-foreground">
                   <FileText className="mx-auto h-8 w-8 mb-2" />
                   <p className="text-sm">No grading criteria added yet</p>
@@ -683,12 +815,16 @@ export function ContentItem({
           <div className="space-y-4 p-4 border rounded-lg bg-purple-50">
             <div className="flex items-center gap-2">
               <Archive className="h-5 w-5 text-purple-600" />
-              <h4 className="font-semibold text-purple-800">Resource Settings</h4>
+              <h4 className="font-semibold text-purple-800">
+                Resource Settings
+              </h4>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Resources & Downloads</label>
+                <label className="text-sm font-medium">
+                  Resources & Downloads
+                </label>
                 <Button
                   type="button"
                   size="sm"
@@ -711,18 +847,29 @@ export function ContentItem({
               </div>
 
               {content.resources?.map((resource, resourceIndex) => (
-                <div key={resourceIndex} className="p-3 border rounded-lg bg-white space-y-2">
+                <div
+                  key={resourceIndex}
+                  className="p-3 border rounded-lg bg-white space-y-2"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Resource {resourceIndex + 1}</span>
+                    <span className="text-sm font-medium">
+                      Resource {resourceIndex + 1}
+                    </span>
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        const updatedResources = content.resources?.filter(
-                          (_, idx) => idx !== resourceIndex
-                        ) || [];
-                        onUpdate(moduleIndex, contentIndex, "resources", updatedResources);
+                        const updatedResources =
+                          content.resources?.filter(
+                            (_, idx) => idx !== resourceIndex
+                          ) || [];
+                        onUpdate(
+                          moduleIndex,
+                          contentIndex,
+                          "resources",
+                          updatedResources
+                        );
                       }}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -738,7 +885,12 @@ export function ContentItem({
                         ...resource,
                         title: e.target.value,
                       };
-                      onUpdate(moduleIndex, contentIndex, "resources", updatedResources);
+                      onUpdate(
+                        moduleIndex,
+                        contentIndex,
+                        "resources",
+                        updatedResources
+                      );
                     }}
                   />
 
@@ -751,7 +903,12 @@ export function ContentItem({
                         ...resource,
                         url: e.target.value,
                       };
-                      onUpdate(moduleIndex, contentIndex, "resources", updatedResources);
+                      onUpdate(
+                        moduleIndex,
+                        contentIndex,
+                        "resources",
+                        updatedResources
+                      );
                     }}
                   />
 
@@ -763,7 +920,12 @@ export function ContentItem({
                         ...resource,
                         type: value as "pdf" | "zip" | "link" | "other",
                       };
-                      onUpdate(moduleIndex, contentIndex, "resources", updatedResources);
+                      onUpdate(
+                        moduleIndex,
+                        contentIndex,
+                        "resources",
+                        updatedResources
+                      );
                     }}
                   >
                     <SelectTrigger>
@@ -794,7 +956,12 @@ export function ContentItem({
                   id={`downloadable-${moduleIndex}-${contentIndex}`}
                   checked={content.allowDownloads || false}
                   onCheckedChange={(checked) =>
-                    onUpdate(moduleIndex, contentIndex, "allowDownloads", checked)
+                    onUpdate(
+                      moduleIndex,
+                      contentIndex,
+                      "allowDownloads",
+                      checked
+                    )
                   }
                 />
                 <label
