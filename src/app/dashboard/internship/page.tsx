@@ -6,6 +6,7 @@ import useInternshipStatus, {
 } from "./hooks/useInternshipStatus";
 import { columns } from "./hooks/useInternshipStatus";
 import { Button } from "@/components/ui/button";
+import { RoleGuard } from "@/components/auth/RoleGuard";
 
 const InternshipReviewPage = () => {
   const {
@@ -70,25 +71,31 @@ const InternshipReviewPage = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">
-        Internship Applications Review
-      </h1>
-      <DataTable
-        columns={columns}
-        data={internshipApplicationsQuery.data?.data?.data || []}
-        renderRowActions={renderRowActions}
-        globalFilterPlaceholder="Search name or email..."
-        serverPagination
-        page={page}
-        pageSize={pageSize}
-        total={internshipApplicationsQuery.data?.data?.meta?.totalCount || 0}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-        search={search}
-        onSearch={setSearch}
-      />
-    </div>
+    <RoleGuard
+      permissions={["internship:manage"]}
+      roles={["admin", "super-admin"]}
+      showFallback={true}
+    >
+      <div>
+        <h1 className="text-2xl font-bold mb-4">
+          Internship Applications Review
+        </h1>
+        <DataTable
+          columns={columns}
+          data={internshipApplicationsQuery.data?.data?.data || []}
+          renderRowActions={renderRowActions}
+          globalFilterPlaceholder="Search name or email..."
+          serverPagination
+          page={page}
+          pageSize={pageSize}
+          total={internshipApplicationsQuery.data?.data?.meta?.totalCount || 0}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          search={search}
+          onSearch={setSearch}
+        />
+      </div>
+    </RoleGuard>
   );
 };
 

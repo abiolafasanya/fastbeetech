@@ -12,13 +12,17 @@ import {
   LayoutGrid,
   Briefcase,
   BookOpen,
+  Users,
+  BarChart3,
 } from "lucide-react";
 import clsx from "clsx";
 import { useSidebarCollapsed, useToggleSidebar } from "@/store/dashboardUI";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function Sidebar() {
   const collapsed = useSidebarCollapsed();
   const toggle = useToggleSidebar();
+  const { can, is } = usePermissions();
 
   return (
     <aside
@@ -53,31 +57,90 @@ export default function Sidebar() {
           label="Overview"
           collapsed={collapsed}
         />
-        {!collapsed && <SectionTitle>Content</SectionTitle>}
-        <NavItem
-          href="/dashboard/blog"
-          icon={<FileText className="w-4 h-4" />}
-          label="Blog"
-          collapsed={collapsed}
-        />
-        <NavItem
-          href="/dashboard/course"
-          icon={<BookOpen className="w-4 h-4" />}
-          label="Courses"
-          collapsed={collapsed}
-        />
-        <NavItem
-          href="/dashboard/internship"
-          icon={<Briefcase className="w-4 h-4" />}
-          label="Internship"
-          collapsed={collapsed}
-        />
-        <NavItem
-          href="/dashboard/comments"
-          icon={<MessageSquare className="w-4 h-4" />}
-          label="Comments"
-          collapsed={collapsed}
-        />
+
+        {/* Content Management Section */}
+        {(can.manageBlogs() ||
+          can.manageCourses() ||
+          is.admin() ||
+          is.superAdmin()) && (
+          <>
+            {!collapsed && <SectionTitle>Content</SectionTitle>}
+
+            {/* Blog Management */}
+            {(can.manageBlogs() || is.admin() || is.superAdmin()) && (
+              <NavItem
+                href="/dashboard/blog"
+                icon={<FileText className="w-4 h-4" />}
+                label="Blog"
+                collapsed={collapsed}
+              />
+            )}
+
+            {/* Course Management */}
+            {(can.manageCourses() ||
+              is.instructor() ||
+              is.admin() ||
+              is.superAdmin()) && (
+              <NavItem
+                href="/dashboard/course"
+                icon={<BookOpen className="w-4 h-4" />}
+                label="Courses"
+                collapsed={collapsed}
+              />
+            )}
+
+            {/* Internship Management */}
+            {(is.admin() || is.superAdmin()) && (
+              <NavItem
+                href="/dashboard/internship"
+                icon={<Briefcase className="w-4 h-4" />}
+                label="Internship"
+                collapsed={collapsed}
+              />
+            )}
+
+            {/* Comments Management */}
+            {(can.manageBlogs() ||
+              can.manageCourses() ||
+              is.admin() ||
+              is.superAdmin()) && (
+              <NavItem
+                href="/dashboard/comments"
+                icon={<MessageSquare className="w-4 h-4" />}
+                label="Comments"
+                collapsed={collapsed}
+              />
+            )}
+          </>
+        )}
+
+        {/* Analytics Section */}
+        {(can.viewAnalytics() || is.admin() || is.superAdmin()) && (
+          <>
+            {!collapsed && <SectionTitle>Analytics</SectionTitle>}
+            <NavItem
+              href="/dashboard/analytics"
+              icon={<BarChart3 className="w-4 h-4" />}
+              label="Analytics"
+              collapsed={collapsed}
+            />
+          </>
+        )}
+
+        {/* User Management Section */}
+        {(can.manageUsers() || is.admin() || is.superAdmin()) && (
+          <>
+            {!collapsed && <SectionTitle>Management</SectionTitle>}
+            <NavItem
+              href="/dashboard/users"
+              icon={<Users className="w-4 h-4" />}
+              label="Users"
+              collapsed={collapsed}
+            />
+          </>
+        )}
+
+        {/* Settings Section */}
         {!collapsed && <SectionTitle>Settings</SectionTitle>}
         <NavItem
           href="/dashboard/settings"

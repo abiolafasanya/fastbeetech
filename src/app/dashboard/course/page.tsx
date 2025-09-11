@@ -23,6 +23,8 @@ import { useCourseMutations } from "./hooks/useCourseMutation";
 import { Course } from "../../../api/CourseApi";
 import { SimplePagination } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/usePagination";
+import { RoleGuard } from "@/components/auth/RoleGuard";
+import { usePermissions } from "@/hooks/usePermissions";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +50,7 @@ type STATUS_TYPE = "all" | "draft" | "published" | "archived" | "coming-soon";
 
 export default function CourseDashboard() {
   const [status, setStatus] = useState<STATUS_TYPE>("all");
+  const { can, is } = usePermissions();
   const pagination = usePagination({ itemsPerPage: 10 });
 
   const { data, isLoading } = useInstructorCourses({
@@ -247,12 +250,17 @@ export default function CourseDashboard() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-              <Link href={`/dashboard/course/${course._id}/edit`}>
-                <DropdownMenuItem>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Course
-                </DropdownMenuItem>
-              </Link>
+              {(can.editCourse() ||
+                is.instructor() ||
+                is.admin() ||
+                is.superAdmin()) && (
+                <Link href={`/dashboard/course/${course._id}/edit`}>
+                  <DropdownMenuItem>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Course
+                  </DropdownMenuItem>
+                </Link>
+              )}
 
               <Link href={`/course/${course.slug}`}>
                 <DropdownMenuItem>
@@ -261,28 +269,44 @@ export default function CourseDashboard() {
                 </DropdownMenuItem>
               </Link>
 
-              <Link href={`/dashboard/course/${course._id}/analytics`}>
-                <DropdownMenuItem>
-                  <TrendingUp className="mr-2 h-4 w-4" />
-                  Analytics
-                </DropdownMenuItem>
-              </Link>
+              {(can.viewAnalytics() ||
+                is.instructor() ||
+                is.admin() ||
+                is.superAdmin()) && (
+                <Link href={`/dashboard/course/${course._id}/analytics`}>
+                  <DropdownMenuItem>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Analytics
+                  </DropdownMenuItem>
+                </Link>
+              )}
 
               <DropdownMenuSeparator />
 
-              {course.status === "draft" && (
-                <DropdownMenuItem onClick={() => handlePublish(course._id)}>
-                  <Globe className="mr-2 h-4 w-4" />
-                  Publish
+              {course.status === "draft" &&
+                (can.publishCourse() ||
+                  is.instructor() ||
+                  is.admin() ||
+                  is.superAdmin()) && (
+                  <DropdownMenuItem onClick={() => handlePublish(course._id)}>
+                    <Globe className="mr-2 h-4 w-4" />
+                    Publish
+                  </DropdownMenuItem>
+                )}
+
+              {(can.editCourse() ||
+                is.instructor() ||
+                is.admin() ||
+                is.superAdmin()) && (
+                <DropdownMenuItem
+                  onClick={() => handleFeature(course._id, !course.isFeatured)}
+                >
+                  <Star className="mr-2 h-4 w-4" />
+                  {course.isFeatured
+                    ? "Remove from Featured"
+                    : "Add to Featured"}
                 </DropdownMenuItem>
               )}
-
-              <DropdownMenuItem
-                onClick={() => handleFeature(course._id, !course.isFeatured)}
-              >
-                <Star className="mr-2 h-4 w-4" />
-                {course.isFeatured ? "Remove from Featured" : "Add to Featured"}
-              </DropdownMenuItem>
 
               <DropdownMenuSeparator />
 
@@ -309,154 +333,168 @@ export default function CourseDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Course Management
-          </h2>
-          <p className="text-muted-foreground">
-            Create and manage your online courses
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/course/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Course
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {data?.data?.pagination?.totalItems || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Students
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">
-              +18% from last month
+    <RoleGuard
+      permissions={["course:view", "course:create", "course:edit"]}
+      showFallback={true}
+    >
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Course Management
+            </h2>
+            <p className="text-muted-foreground">
+              Create and manage your online courses
             </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$12,345</div>
-            <p className="text-xs text-muted-foreground">
-              +25% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Rating</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4.8</div>
-            <p className="text-xs text-muted-foreground">
-              +0.2 from last month
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as STATUS_TYPE)}
-            className="flex h-10 w-[180px] items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="all">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-            <option value="coming-soon">Coming Soon</option>
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="relative w-64">
-            <input
-              type="text"
-              placeholder="Search courses..."
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            />
+          </div>
+          <div className="flex items-center gap-2">
+            {(can.createCourse() ||
+              is.instructor() ||
+              is.admin() ||
+              is.superAdmin()) && (
+              <Link href="/dashboard/course/new">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Course
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Courses Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Courses</CardTitle>
-          <CardDescription>
-            Manage your course content, pricing, and student progress.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DataTable columns={columns} data={data?.data?.courses || []} />
-          {data?.data?.courses?.length === 0 && (
-            <div className="text-center py-10">
-              <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">
-                No courses
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Get started by creating your first course.
-              </p>
-              <div className="mt-6">
-                <Link href="/dashboard/course/new">
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Course
-                  </Button>
-                </Link>
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Courses
+              </CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {data?.data?.pagination?.totalItems || 0}
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              <p className="text-xs text-muted-foreground">
+                +2 from last month
+              </p>
+            </CardContent>
+          </Card>
 
-      {/* Pagination */}
-      {data?.data?.pagination && (
-        <SimplePagination
-          currentPage={pagination.currentPage}
-          totalPages={data.data.pagination.totalPages}
-          totalItems={data.data.pagination.totalItems}
-          itemsPerPage={pagination.itemsPerPage}
-          onPageChange={pagination.goToPage}
-          itemName="courses"
-        />
-      )}
-    </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Students
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">1,234</div>
+              <p className="text-xs text-muted-foreground">
+                +18% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$12,345</div>
+              <p className="text-xs text-muted-foreground">
+                +25% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Avg. Rating</CardTitle>
+              <Star className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">4.8</div>
+              <p className="text-xs text-muted-foreground">
+                +0.2 from last month
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters and Search */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as STATUS_TYPE)}
+              className="flex h-10 w-[180px] items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="all">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+              <option value="coming-soon">Coming Soon</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="relative w-64">
+              <input
+                type="text"
+                placeholder="Search courses..."
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Courses Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Courses</CardTitle>
+            <CardDescription>
+              Manage your course content, pricing, and student progress.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DataTable columns={columns} data={data?.data?.courses || []} />
+            {data?.data?.courses?.length === 0 && (
+              <div className="text-center py-10">
+                <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-2 text-sm font-semibold text-gray-900">
+                  No courses
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Get started by creating your first course.
+                </p>
+                <div className="mt-6">
+                  <Link href="/dashboard/course/new">
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Course
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Pagination */}
+        {data?.data?.pagination && (
+          <SimplePagination
+            currentPage={pagination.currentPage}
+            totalPages={data.data.pagination.totalPages}
+            totalItems={data.data.pagination.totalItems}
+            itemsPerPage={pagination.itemsPerPage}
+            onPageChange={pagination.goToPage}
+            itemName="courses"
+          />
+        )}
+      </div>
+    </RoleGuard>
   );
 }
