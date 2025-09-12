@@ -320,7 +320,7 @@ export function ViewUserPermissionsModal({
                     All Effective Permissions
                   </h3>
                   <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-                    {analysis.effectivePermissions.map((permission) => (
+                    {analysis?.effectivePermissions?.map((permission) => (
                       <Badge
                         key={permission}
                         variant="default"

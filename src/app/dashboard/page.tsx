@@ -50,14 +50,14 @@ type AdminStatsResponse = {
 
 // If your Express API is reverse-proxied under the same domain (recommended),
 // use a relative URL and cookies forward automatically in RSC:
-const API_PATH = "/api/admin/stats";
+const API_PATH = "/admin/stats";
 
 export default async function AdminHome() {
-  const hdrs = headers();
-  const host = (await hdrs).get("host")!;
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+  // const hdrs = headers();
+  // const host = (await hdrs).get("host")!;
+  // const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
 
-  const url = `${protocol}://${host}${API_PATH}`;
+  const url = `${process.env.BACKEND_URL}${API_PATH}`;
 
   const res = await fetch(url, {
     // Keep it dynamic

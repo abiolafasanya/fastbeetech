@@ -9,6 +9,8 @@ import UserApi, {
   BulkAssignResult,
   PermissionAnalysis,
 } from "@/api/UserApi";
+import { handleServerError } from "@/lib/errorHelper";
+import { AxiosError } from "axios";
 
 // Re-export types for convenience
 export type {
@@ -99,7 +101,7 @@ export const useAddPermissions = () => {
       permissions: string[];
     }) => UserApi.addPermissions(userId, permissions),
     onSuccess: (data, variables) => {
-      toast.success(data.data.message || "Permissions added successfully");
+      toast.success(data.message || "Permissions added successfully");
       queryClient.invalidateQueries({
         queryKey: userQueryKeys.detail(variables.userId),
       });
@@ -125,7 +127,7 @@ export const useRemovePermissions = () => {
       permissions: string[];
     }) => UserApi.removePermissions(userId, permissions),
     onSuccess: (data, variables) => {
-      toast.success(data.data.message || "Permissions removed successfully");
+      toast.success(data.message || "Permissions removed successfully");
       queryClient.invalidateQueries({
         queryKey: userQueryKeys.detail(variables.userId),
       });
@@ -145,14 +147,18 @@ export const useResetPermissions = () => {
   return useMutation({
     mutationFn: (userId: string) => UserApi.resetPermissions(userId),
     onSuccess: (data, userId) => {
-      toast.success(data.data.message || "Permissions reset successfully");
+      console.log("Reset Permissions Response:", data);
+      toast.success(data.message || "Permissions reset successfully");
       queryClient.invalidateQueries({ queryKey: userQueryKeys.detail(userId) });
       queryClient.invalidateQueries({
         queryKey: userQueryKeys.permissionAnalysis(userId),
       });
+      queryClient.refetchQueries({ queryKey: userQueryKeys.all });
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to reset permissions");
+      if (error instanceof AxiosError) {
+        handleServerError(error || "Failed to reset permissions");
+      }
     },
   });
 };
@@ -164,7 +170,7 @@ export const useBulkAssignRole = () => {
     mutationFn: ({ userIds, role }: { userIds: string[]; role: string }) =>
       UserApi.bulkAssignRole(userIds, role),
     onSuccess: (data) => {
-      toast.success(data.data.message || "Roles assigned successfully");
+      toast.success(data.message || "Roles assigned successfully");
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
     },
     onError: (error: Error) => {
@@ -179,7 +185,7 @@ export const useMakeMeSuperAdmin = () => {
   return useMutation({
     mutationFn: () => UserApi.makeMeSuperAdmin(),
     onSuccess: (data) => {
-      toast.success(data.data.message || "You are now a super admin!");
+      toast.success(data.message || "You are now a super admin!");
       // Invalidate all queries to refresh permissions
       queryClient.invalidateQueries();
       // Reload the page to update permissions context
@@ -231,7 +237,7 @@ export const useUpdateUser = () => {
       }>;
     }) => UserApi.updateUser(userId, userData),
     onSuccess: (data, variables) => {
-      toast.success("User updated successfully");
+      toast.success(data.message || "User updated successfully");
       queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
       queryClient.invalidateQueries({
         queryKey: userQueryKeys.detail(variables.userId),
