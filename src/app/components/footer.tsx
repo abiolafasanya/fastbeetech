@@ -9,20 +9,20 @@ export default function Footer() {
       </p>
 
       <div className="flex justify-center gap-6">
-        <Link href="https://facebook.com" target="_blank" aria-label="Facebook">
+        <Link href="https://facebook.com/hexonest" target="_blank" aria-label="Facebook">
           <Facebook className="w-5 h-5 hover:text-blue-500" />
         </Link>
-        <Link href="https://twitter.com" target="_blank" aria-label="Twitter">
+        <Link href="https://twitter.com/hexonest" target="_blank" aria-label="Twitter">
           <Twitter className="w-5 h-5 hover:text-sky-400" />
         </Link>
         <Link
-          href="https://instagram.com"
+          href="https://instagram.com/hexonest"
           target="_blank"
           aria-label="Instagram"
         >
           <Instagram className="w-5 h-5 hover:text-pink-400" />
         </Link>
-        <Link href="https://linkedin.com" target="_blank" aria-label="LinkedIn">
+        <Link href="https://linkedin.com/hexonest" target="_blank" aria-label="LinkedIn">
           <Linkedin className="w-5 h-5 hover:text-blue-400" />
         </Link>
       </div>

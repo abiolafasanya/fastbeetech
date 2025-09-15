@@ -3,6 +3,7 @@ import { Menu, Moon, Sun, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import useHeader from "./hooks/useHeader";
+import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
@@ -10,6 +11,14 @@ import { useAuthStore } from "@/store/authStore";
 export default function Header() {
   const { isOpen, setIsOpen, theme, toggleTheme } = useHeader();
   const { logout, user, isLoggedOut } = useAuthStore();
+  const firstFocusRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      // focus the first interactive element in the mobile menu for accessibility
+      firstFocusRef.current?.focus();
+    }
+  }, [isOpen]);
 
   return (
     <>
@@ -105,6 +114,8 @@ export default function Header() {
               // className="absolute top-16 left-0 w-full bg-background px-6 py-4 shadow-md"
               className="absolute top-[4.5rem] left-4 right-4 bg-background rounded-xl shadow-lg px-6 py-4 z-50"
               onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+              role="dialog"
+              aria-modal="true"
             >
               <nav className="flex flex-col gap-4">
                 <Link
@@ -135,6 +146,39 @@ export default function Header() {
                 >
                   Blog
                 </Link>
+                {/* Mobile auth controls (mirror desktop) */}
+                <div className="pt-2 border-t mt-2 flex flex-col gap-2">
+                  {isLoggedOut ? (
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" ref={firstFocusRef}>
+                        Login
+                      </Button>
+                    </Link>
+                  ) : (
+                    <>
+                      {user && user.role !== "user" && (
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setIsOpen(false)}
+                          className="text-sm font-medium"
+                        >
+                          Dashboard
+                        </Link>
+                      )}
+                      <Button
+                        variant="default"
+                        className="my-2.5"
+                        ref={firstFocusRef}
+                        onClick={() => {
+                          logout();
+                          setIsOpen(false);
+                        }}
+                      >
+                        Logout
+                      </Button>
+                    </>
+                  )}
+                </div>
               </nav>
             </motion.div>
           </motion.div>
