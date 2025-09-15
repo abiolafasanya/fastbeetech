@@ -43,7 +43,7 @@ export async function generateMetadata({
     };
   } catch {
     return {
-      title: "Post not found | Fastbeetech",
+      title: "Post not found | Hexonest",
       robots: { index: false, follow: false },
     };
   }
@@ -100,10 +100,7 @@ export default async function BlogPostPage({
       ) : null}
 
       {/* Blog comments and reactions */}
-      <BlogEngagement
-        postId={post._id}
-        slug={post.slug}
-      />
+      <BlogEngagement postId={post._id} slug={post.slug} />
     </article>
   );
 }
