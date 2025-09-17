@@ -19,6 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "./button";
+import { Input } from "./input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -122,13 +124,14 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
   return (
     <div className="rounded-md border">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 p-2">
-        <button
-          className="px-2 py-1 border rounded bg-gray-100 hover:bg-gray-200 text-sm mb-2 md:mb-0"
+        <Button
+        variant={"secondary"}
+          // className="px-2 py-1 border rounded bg-gray-100 hover:bg-gray-200 text-sm mb-2 md:mb-0"
           onClick={exportCSV}
         >
           Export CSV
-        </button>
-        <input
+        </Button>
+        <Input
           type="text"
           value={serverPagination ? search : globalFilter}
           onChange={(e) =>
