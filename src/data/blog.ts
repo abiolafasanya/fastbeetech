@@ -1,4 +1,18 @@
-export const blogs = [
+// Temporary static data until we have a CMS
+// This file exports demo blog posts synchronously so server components
+// (like the landing page) can import them directly without awaiting an API.
+
+export type DemoBlog = {
+  title: string;
+  date: string;
+  author: string;
+  excerpt: string;
+  tags: string[];
+  cover: string;
+  slug: string;
+};
+
+export const demoBlogs: DemoBlog[] = [
   {
     title: "The 6 AI Trends You'll See More of in 2025",
     date: "2025-08-09",
@@ -30,4 +44,3 @@ export const blogs = [
     slug: "vibe-coding-ai-workflow",
   },
 ];
-

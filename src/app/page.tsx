@@ -1,11 +1,29 @@
-// "use client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { blogs } from "@/data/blog";
+import BlogApi, { BlogPost } from "@/api/BlogApi";
+import { demoBlogs, DemoBlog } from "@/data/blog";
 
-export default function LandingPage() {
+function getPostKey(post: BlogPost | DemoBlog, idx: number) {
+  if ((post as BlogPost)._id) return String((post as BlogPost)._id);
+  // demoBlogs items have a slug property
+  if ("slug" in post) return (post as DemoBlog).slug;
+  return String(idx);
+}
+
+export default async function LandingPage() {
+  let posts: (BlogPost | DemoBlog)[] = demoBlogs;
+  try {
+    const res = await BlogApi.list({ limit: 3, status: "published" });
+    if (res && res.status && Array.isArray(res.data) && res.data.length) {
+      posts = res.data;
+    }
+  } catch {
+    // keep demoBlogs as fallback
+
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar with Logo & Mobile Toggle */}
@@ -92,8 +110,8 @@ export default function LandingPage() {
             Latest Blog Posts
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {blogs.map((blog, i) => (
-              <Card key={i}>
+            {posts.map((blog, i: number) => (
+              <Card key={getPostKey(blog, i)}>
                 <CardHeader>
                   <CardTitle>{blog.title}</CardTitle>
                 </CardHeader>

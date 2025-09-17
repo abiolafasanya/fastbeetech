@@ -1,11 +1,13 @@
 // app/blog/[slug]/page.tsx
 import Image from "next/image";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { BlogApi } from "@/lib/blog";
 import PostContent from "@/components/PostContent";
 import BlogEngagement from "@/components/BlogEngagement";
 import PostViewTracker from "@/components/PostViewTracker";
+import { demoBlogs, DemoBlog } from "@/data/blog";
+// BlogPost type not required in this file after demo redirect behavior
 
 export const dynamic = "force-static";
 export const revalidate = 300;
@@ -63,13 +65,20 @@ export default async function BlogPostPage({
     const resp = await BlogApi.bySlug(slug);
     post = resp.data;
   } catch {
-    notFound();
+    // If the API fails or returns 404, redirect demo post slugs to the blog listing per UX preference
+    const demo = demoBlogs.find((d) => d.slug === slug) as DemoBlog | undefined;
+    if (demo) {
+      // Redirect demo/demo-only content to the main blog listing
+      redirect("/blog");
+    } else {
+      notFound();
+    }
   }
 
   return (
     <article className="prose prose-neutral dark:prose-invert mx-auto py-12 px-4 max-w-3xl">
-      {/* client-side tracker to record a view event */}
-      <PostViewTracker postId={post._id} />
+      {/* client-side tracker to record a view event for real posts (has an _id) */}
+      {post._id ? <PostViewTracker postId={post._id} /> : null}
       {post.cover ? (
         <Image
           src={post.cover}
@@ -102,8 +111,8 @@ export default async function BlogPostPage({
         </div>
       ) : null}
 
-      {/* Blog comments and reactions */}
-      <BlogEngagement postId={post._id} slug={post.slug} />
+      {/* Blog comments and reactions (only for real posts) */}
+      {post._id ? <BlogEngagement postId={post._id} slug={post.slug} /> : null}
     </article>
   );
 }
