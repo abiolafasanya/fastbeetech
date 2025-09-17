@@ -115,10 +115,10 @@ export default function UsersManagementPage() {
                 ? "default"
                 : status === "inactive"
                 ? "secondary"
-                : "destructive"
+                : "outline"
             }
           >
-            {status}
+            {status || "N/A"}
           </Badge>
         );
       },

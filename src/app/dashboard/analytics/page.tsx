@@ -13,6 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { RoleGuard } from "@/components/auth/RoleGuard";
+import AnalyticsApiInstance, { AnalyticsTotals } from "@/api/AnalyticsApi";
 
 export default function BlogAnalyticsPage() {
   const [from, setFrom] = useState<string>("");
@@ -20,24 +21,19 @@ export default function BlogAnalyticsPage() {
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["analytics", { from, to }],
-    queryFn: async () => {
-      const qs = new URLSearchParams();
-      if (from) qs.set("from", new Date(from).toISOString());
-      if (to) qs.set("to", new Date(to).toISOString());
-      const res = await fetch(
-        `/api/v1/admin/analytics/overview?${qs.toString()}`,
-        { credentials: "include" }
-      );
-      return res.json();
-    },
+    queryFn: async () =>
+      await AnalyticsApiInstance.adminAnalyticsOverview({
+        from: from ? new Date(from).toISOString() : undefined,
+        to: to ? new Date(to).toISOString() : undefined,
+      }),
   });
 
   const stats = data?.data;
-  const totals = stats?.totals || {};
+  const totals = stats?.totals || {} as AnalyticsTotals;
   const series = stats?.series || [];
 
   return (
-    <RoleGuard permissions={["analytics:view"]} showFallback={true}>
+    <RoleGuard permissions={["analytics:view_basic", "analytics:view_advanced"]} showFallback={true}>
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">Blog Analytics</h2>
@@ -67,7 +63,7 @@ export default function BlogAnalyticsPage() {
               <CardTitle>Total Views</CardTitle>
             </CardHeader>
             <CardContent className="text-2xl font-semibold">
-              {totals.views ?? 0}
+              {totals.views || 0}
             </CardContent>
           </Card>
           <Card>
@@ -75,7 +71,7 @@ export default function BlogAnalyticsPage() {
               <CardTitle>Reads</CardTitle>
             </CardHeader>
             <CardContent className="text-2xl font-semibold">
-              {totals.reads ?? 0}
+              {totals.reads || 0}
             </CardContent>
           </Card>
           <Card>
@@ -83,7 +79,7 @@ export default function BlogAnalyticsPage() {
               <CardTitle>Completion Rate</CardTitle>
             </CardHeader>
             <CardContent className="text-2xl font-semibold">
-              {(stats?.completionRate ?? 0) + "%"}
+              {(stats?.completionRate || 0) + "%"}
             </CardContent>
           </Card>
           <Card>
@@ -91,7 +87,7 @@ export default function BlogAnalyticsPage() {
               <CardTitle>Shares</CardTitle>
             </CardHeader>
             <CardContent className="text-2xl font-semibold">
-              {totals.shares ?? 0}
+              {totals.shares || 0}
             </CardContent>
           </Card>
         </div>

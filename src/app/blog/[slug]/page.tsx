@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { BlogApi } from "@/lib/blog";
 import PostContent from "@/components/PostContent";
 import BlogEngagement from "@/components/BlogEngagement";
+import PostViewTracker from "@/components/PostViewTracker";
 
 export const dynamic = "force-static";
 export const revalidate = 300;
@@ -67,6 +68,8 @@ export default async function BlogPostPage({
 
   return (
     <article className="prose prose-neutral dark:prose-invert mx-auto py-12 px-4 max-w-3xl">
+      {/* client-side tracker to record a view event */}
+      <PostViewTracker postId={post._id} />
       {post.cover ? (
         <Image
           src={post.cover}
