@@ -52,20 +52,29 @@ class AuthApi {
     return data.data;
   }
   // async updateProfile(payload: UpdateProfileSchema): Promise<AuthResponse> {
-  //   const { data }: AxiosResponse<{ data: AuthResponse }> = await axios.patch(
-  //     `${this.url}/profile`,
-  //     payload
-  //   );
-  //   return data.data;
-  // }
+  // Update profile
+  async updateProfile(payload: {
+    name?: string;
+    phone?: string;
+    avatar?: string | null;
+  }): Promise<{ status: boolean; data: User; message?: string }> {
+    const {
+      data,
+    }: AxiosResponse<{ status: boolean; data: User; message?: string }> =
+      await axios.patch(`${this.url}/profile`, payload);
+    return data;
+  }
 
   // async changePassword(payload: ChangePasswordSchema): Promise<AuthResponse> {
-  //   const { data }: AxiosResponse<{ data: AuthResponse }> = await axios.post(
-  //     `${this.url}/change-password`,
-  //     payload
-  //   );
-  //   return data.data;
-  // }
+  // Change password
+  async changePassword(payload: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<{ status?: boolean; message?: string }> {
+    const { data }: AxiosResponse<{ status?: boolean; message?: string }> =
+      await axios.post(`${this.url}/change-password`, payload);
+    return data;
+  }
 
   async verifyEmail(payload: {
     token: string;

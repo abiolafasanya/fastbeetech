@@ -24,7 +24,7 @@ export async function generateMetadata({
     const { slug } = await params; // <-- await it
     const { data: post } = await BlogApi.bySlug(slug);
     const cover = post.ogImage || post.cover || "/opengraph-image.png";
-    const url = `https://fastbeetech.com/blog/${post.slug}`;
+    const url = `${process.env.NEXT_PUBLIC_SITE_URL!}/blog/${post.slug}`;
     return {
       title: post.metaTitle || post.title,
       description: post.metaDescription || post.excerpt,
